@@ -4,6 +4,8 @@ Open-source portfolio analysis tools for DIY investors and finance enthusiasts. 
 
 ## Getting Started
 
+Try out the [Basic Portfolio Analysis Notebook](https://colab.research.google.com/github/engineerinvestor/Portfolio-Analysis/blob/main/Basic_Portfolio_Analysis.ipynb) using Google Colab. It's free and runs in the browser.
+
 ### Prerequisites
 
 - Python 3.7+
