@@ -47,6 +47,7 @@ We welcome contributions from the community. Please read the following guideline
 - [Quant Stats](https://github.com/ranaroussi/quantstats): Portfolio analytics for quants, including performance and risk metrics.
 - [skfolio](https://github.com/skfolio/skfolio): A package for portfolio performance evaluation.
 - [Riskfolio-Lib](https://riskfolio-lib.readthedocs.io/en/latest/): A Python library for portfolio optimization and risk management.
+- [PyPortfolioOpt](https://github.com/robertmartin8/PyPortfolioOpt)
 
 ## License
 
