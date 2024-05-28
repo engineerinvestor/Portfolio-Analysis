@@ -31,6 +31,8 @@ We welcome contributions from the community. Please read the following guideline
 4. Push to the branch (`git push origin feature-name`).
 5. Create a new Pull Request.
 
+Here is a more detailed instrctuion set for beginners: [A Beginner's Guide to Contributing to the Portfolio Analysis Repository](https://github.com/engineerinvestor/Portfolio-Analysis/blob/main/Tutorials/Beginner's_Guide_to_Contributing_to_the_Portfolio_Analysis_Repository.ipynb)
+
 ## Key Feature Requests and Improvements
 
 - **Clarify Leverage Handling:** Ensure that documentation and examples are clear on how leverage is treated in portfolio calculations.
