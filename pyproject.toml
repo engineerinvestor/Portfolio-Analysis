@@ -1,0 +1,92 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "portfolio-analysis"
+version = "0.1.0"
+description = "Professional portfolio analysis tools for DIY investors"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Engineer Investor", email = "egr.investor@gmail.com"}
+]
+keywords = [
+    "portfolio",
+    "investing",
+    "finance",
+    "analysis",
+    "monte-carlo",
+    "optimization",
+    "stocks",
+    "etf"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "pandas>=1.3.0",
+    "numpy>=1.20.0",
+    "yfinance>=0.2.0",
+    "matplotlib>=3.5.0",
+]
+
+[project.optional-dependencies]
+optimization = [
+    "scipy>=1.7.0",
+]
+interactive = [
+    "ipywidgets>=7.6.0",
+]
+streamlit = [
+    "streamlit>=1.20.0",
+    "plotly>=5.10.0",
+    "scipy>=1.7.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "black>=22.0.0",
+    "ruff>=0.1.0",
+]
+all = [
+    "portfolio-analysis[optimization,interactive,streamlit,dev]",
+]
+
+[project.urls]
+Homepage = "https://github.com/engineerinvestor/Portfolio-Analysis"
+Documentation = "https://github.com/engineerinvestor/Portfolio-Analysis#readme"
+Repository = "https://github.com/engineerinvestor/Portfolio-Analysis"
+Issues = "https://github.com/engineerinvestor/Portfolio-Analysis/issues"
+Twitter = "https://twitter.com/egr_investor"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["portfolio_analysis*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E501"]
