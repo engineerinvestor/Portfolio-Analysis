@@ -46,3 +46,6 @@ Thumbs.db
 # Local configuration
 .env
 .env.local
+
+# Private roadmap (pro features)
+.roadmap-pro.md
