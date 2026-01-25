@@ -1,5 +1,9 @@
 # Portfolio-Analysis
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://engineer-investor-portfolio-analysis.streamlit.app/)
+[![PyPI version](https://badge.fury.io/py/engineer-investor-portfolio.svg)](https://badge.fury.io/py/engineer-investor-portfolio)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Open-source portfolio analysis tools for DIY investors and finance enthusiasts. This repository aims to provide a comprehensive suite of tools to analyze and optimize investment portfolios, with an emphasis on transparency, flexibility, and extensibility.
 
 ## Quick Start
@@ -13,7 +17,7 @@ Open-source portfolio analysis tools for DIY investors and finance enthusiasts. 
 ### Install as Python Package
 
 ```bash
-pip install portfolio-analysis
+pip install engineer-investor-portfolio
 ```
 
 Or install from source with all features:
@@ -29,6 +33,10 @@ pip install -e ".[all]"
 ```bash
 pip install -r requirements-streamlit.txt
 streamlit run streamlit_app/app.py
+```
+
+### Or Use the Live App
+[**Launch Streamlit App**](https://engineer-investor-portfolio-analysis.streamlit.app/)
 ```
 
 ## Features
@@ -110,27 +118,27 @@ Portfolio-Analysis/
 
 ### Minimal (Core Analysis)
 ```bash
-pip install portfolio-analysis
+pip install engineer-investor-portfolio
 ```
 
 ### With Optimization
 ```bash
-pip install "portfolio-analysis[optimization]"
+pip install "engineer-investor-portfolio[optimization]"
 ```
 
 ### With Interactive Widgets
 ```bash
-pip install "portfolio-analysis[interactive]"
+pip install "engineer-investor-portfolio[interactive]"
 ```
 
 ### For Streamlit App
 ```bash
-pip install "portfolio-analysis[streamlit]"
+pip install "engineer-investor-portfolio[streamlit]"
 ```
 
 ### Full Development
 ```bash
-pip install "portfolio-analysis[all]"
+pip install "engineer-investor-portfolio[all]"
 ```
 
 ## Contributing
