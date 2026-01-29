@@ -75,12 +75,35 @@ class BenchmarkComparison:
         start_date = self.portfolio_data.index.min()
         end_date = self.portfolio_data.index.max()
 
-        benchmark = yf.download(
+        raw_data = yf.download(
             self.benchmark_ticker,
             start=start_date,
             end=end_date,
             progress=False
-        )['Adj Close']
+        )
+
+        # Handle yfinance column format changes across versions
+        # Check for MultiIndex columns (yfinance >= 0.2.40)
+        if isinstance(raw_data.columns, pd.MultiIndex):
+            price_types = raw_data.columns.get_level_values(0).unique()
+            if 'Adj Close' in price_types:
+                benchmark = raw_data['Adj Close']
+            elif 'Close' in price_types:
+                benchmark = raw_data['Close']
+            else:
+                raise ValueError(f"No Close or Adj Close column found. Available: {price_types.tolist()}")
+        else:
+            if 'Adj Close' in raw_data.columns:
+                benchmark = raw_data['Adj Close']
+            elif 'Close' in raw_data.columns:
+                benchmark = raw_data['Close']
+            else:
+                raise ValueError(f"No Close or Adj Close column found. Available: {raw_data.columns.tolist()}")
+
+        # Ensure we return a Series, not a DataFrame
+        if isinstance(benchmark, pd.DataFrame):
+            benchmark = benchmark.squeeze()
+
         return benchmark
 
     def calculate_beta(self) -> float:
