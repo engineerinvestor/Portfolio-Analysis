@@ -1,0 +1,39 @@
+<div class="section">
+    <h1>{{ title }}</h1>
+    <p class="date-range">{{ start_date }} to {{ end_date }}</p>
+
+    <h3>Allocation</h3>
+    <div class="allocation-list">
+        {% for item in allocation %}
+        <span class="allocation-badge">{{ item.ticker }}: {{ item.weight|round(1) }}%</span>
+        {% endfor %}
+    </div>
+
+    <h3>Key Metrics</h3>
+    <div class="metrics-grid">
+        <div class="metric-card {{ 'positive' if metrics.total_return > 0 else 'negative' }}">
+            <div class="value">{{ "%.2f"|format(metrics.total_return) }}%</div>
+            <div class="label">Total Return</div>
+        </div>
+        <div class="metric-card {{ 'positive' if metrics.cagr > 0 else 'negative' }}">
+            <div class="value">{{ "%.2f"|format(metrics.cagr) }}%</div>
+            <div class="label">CAGR</div>
+        </div>
+        <div class="metric-card">
+            <div class="value">{{ "%.2f"|format(metrics.annual_volatility) }}%</div>
+            <div class="label">Volatility</div>
+        </div>
+        <div class="metric-card">
+            <div class="value">{{ "%.2f"|format(metrics.sharpe_ratio) }}</div>
+            <div class="label">Sharpe Ratio</div>
+        </div>
+        <div class="metric-card">
+            <div class="value">{{ "%.2f"|format(metrics.sortino_ratio) }}</div>
+            <div class="label">Sortino Ratio</div>
+        </div>
+        <div class="metric-card negative">
+            <div class="value">{{ "%.2f"|format(metrics.max_drawdown) }}%</div>
+            <div class="label">Max Drawdown</div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+<div class="section">
+    <h2>Monthly Returns</h2>
+
+    <div class="chart-container">
+        <img src="{{ chart }}" alt="Monthly Returns Heatmap">
+    </div>
+
+    <div class="two-column">
+        <div>
+            <h3>Monthly Statistics</h3>
+            <div class="metrics-grid">
+                <div class="metric-card positive">
+                    <div class="value">+{{ "%.2f"|format(best_month) }}%</div>
+                    <div class="label">Best Month ({{ best_month_date }})</div>
+                </div>
+                <div class="metric-card negative">
+                    <div class="value">{{ "%.2f"|format(worst_month) }}%</div>
+                    <div class="label">Worst Month ({{ worst_month_date }})</div>
+                </div>
+                <div class="metric-card">
+                    <div class="value">{{ "%.2f"|format(avg_monthly_return) }}%</div>
+                    <div class="label">Avg Monthly Return</div>
+                </div>
+                <div class="metric-card">
+                    <div class="value">{{ "%.1f"|format(win_rate) }}%</div>
+                    <div class="label">Positive Months ({{ positive_months }}/{{ total_months }})</div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Annual Returns</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for yr in annual_returns %}
+                    <tr>
+                        <td>{{ yr.year }}</td>
+                        <td class="{{ 'text-positive' if yr.return > 0 else 'text-negative' }}">
+                            {{ "%.2f"|format(yr.return) }}%
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
