@@ -54,6 +54,13 @@ streamlit run streamlit_app/app.py
 - Target Return optimization
 - Efficient Frontier visualization
 
+### HTML Tear Sheet Reports
+- Professional portfolio reports inspired by [QuantStats](https://github.com/ranaroussi/quantstats)
+- Embedded charts (cumulative returns, drawdowns, monthly heatmap)
+- Comprehensive metrics tables (risk, return, ratios)
+- Optional benchmark comparison section
+- Self-contained HTML files with no external dependencies
+
 ### Interactive Tools
 - Jupyter widgets for Colab/notebook analysis
 - Streamlit web application
@@ -93,6 +100,27 @@ print(f"Optimal weights: {optimal['weights']}")
 optimizer.plot_efficient_frontier()
 ```
 
+### HTML Tear Sheet
+
+```python
+from portfolio_analysis import DataLoader, PortfolioAnalysis, BenchmarkComparison
+from portfolio_analysis.reporting import ReportBuilder
+
+# Load data and create portfolio
+loader = DataLoader(['VTI', 'BND'], '2020-01-01', '2024-01-01')
+data = loader.fetch_data()
+portfolio = PortfolioAnalysis(data, [0.6, 0.4])
+
+# Generate basic report
+report = ReportBuilder(portfolio, title="60/40 Portfolio")
+report.generate("tearsheet.html")
+
+# With benchmark comparison
+benchmark = BenchmarkComparison(data, [0.6, 0.4], benchmark_ticker='SPY')
+report = ReportBuilder(portfolio, benchmark=benchmark, title="60/40 Portfolio")
+report.generate("tearsheet_with_benchmark.html")
+```
+
 ## Repository Structure
 
 ```
@@ -102,6 +130,7 @@ Portfolio-Analysis/
 │   ├── metrics/                 # Performance & benchmark metrics
 │   ├── analysis/                # Portfolio & Monte Carlo analysis
 │   ├── visualization/           # Plotting & interactive widgets
+│   ├── reporting/               # HTML tear sheet generation
 │   └── utils/                   # Helper functions
 ├── streamlit_app/               # Web application
 │   └── app.py                   # Main Streamlit app
@@ -162,7 +191,8 @@ See also: [Beginner's Guide to Contributing](https://github.com/engineerinvestor
 - [x] Python package (PyPI-ready)
 - [x] Portfolio optimization
 - [x] Streamlit web application
-- [ ] Factor regression analysis
+- [x] HTML tear sheet reports
+- [ ] Factor analysis (Fama-French, momentum, quality)
 - [ ] Time-varying risk-free rate (T-bill data)
 - [ ] Tax-loss harvesting tools
 - [ ] Comprehensive test coverage
