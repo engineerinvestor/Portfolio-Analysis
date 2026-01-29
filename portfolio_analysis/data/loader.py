@@ -51,14 +51,35 @@ class DataLoader:
         pd.DataFrame
             DataFrame with dates as index and tickers as columns
         """
-        data = yf.download(
+        raw_data = yf.download(
             self.tickers,
             start=self.start_date,
             end=self.end_date,
             progress=progress
-        )['Adj Close']
+        )
 
-        # Handle single ticker case
+        # Handle yfinance column format changes across versions
+        # yfinance >= 0.2.40: 'Close' is adjusted, MultiIndex is (Price, Ticker)
+        # yfinance < 0.2.40: 'Adj Close' exists, MultiIndex is (Price, Ticker)
+        if isinstance(raw_data.columns, pd.MultiIndex):
+            # Multi-ticker download with MultiIndex columns
+            price_types = raw_data.columns.get_level_values(0).unique()
+            if 'Adj Close' in price_types:
+                data = raw_data['Adj Close']
+            elif 'Close' in price_types:
+                data = raw_data['Close']
+            else:
+                raise ValueError(f"No Close or Adj Close column found. Available: {price_types.tolist()}")
+        else:
+            # Single ticker or flat columns
+            if 'Adj Close' in raw_data.columns:
+                data = raw_data['Adj Close']
+            elif 'Close' in raw_data.columns:
+                data = raw_data['Close']
+            else:
+                raise ValueError(f"No Close or Adj Close column found. Available: {raw_data.columns.tolist()}")
+
+        # Handle single ticker case - ensure DataFrame format
         if isinstance(data, pd.Series):
             data = data.to_frame(name=self.tickers[0])
 
