@@ -1,0 +1,60 @@
+<div class="section">
+    <h2>Benchmark Comparison: {{ benchmark_ticker }} ({{ benchmark_name }})</h2>
+
+    <div class="chart-container">
+        <img src="{{ chart }}" alt="Portfolio vs Benchmark Chart">
+    </div>
+
+    <div class="two-column">
+        <div>
+            <h3>Return Comparison</h3>
+            <div style="background: white; border-radius: 6px; padding: 1rem; border: 1px solid var(--border-color);">
+                {% for metric in return_metrics %}
+                <div class="summary-row">
+                    <span class="name">{{ metric.name }}</span>
+                    <span class="value">{{ metric.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Risk Comparison</h3>
+            <div style="background: white; border-radius: 6px; padding: 1rem; border: 1px solid var(--border-color);">
+                {% for metric in risk_metrics %}
+                <div class="summary-row">
+                    <span class="name">{{ metric.name }}</span>
+                    <span class="value">{{ metric.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <h3>CAPM Metrics</h3>
+            <div style="background: white; border-radius: 6px; padding: 1rem; border: 1px solid var(--border-color);">
+                {% for metric in capm_metrics %}
+                <div class="summary-row">
+                    <span class="name">{{ metric.name }}</span>
+                    <span class="value">{{ metric.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Performance Metrics</h3>
+            <div style="background: white; border-radius: 6px; padding: 1rem; border: 1px solid var(--border-color);">
+                {% for metric in performance_metrics %}
+                <div class="summary-row">
+                    <span class="name">{{ metric.name }}</span>
+                    <span class="value">{{ metric.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if rolling_chart %}
+    <h3>Rolling Alpha & Beta</h3>
+    <div class="chart-container">
+        <img src="{{ rolling_chart }}" alt="Rolling Alpha and Beta Chart">
+    </div>
+    {% endif %}
+</div>

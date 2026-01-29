@@ -1,0 +1,50 @@
+<div class="section">
+    <h2>Drawdowns</h2>
+
+    <div class="chart-container">
+        <img src="{{ chart }}" alt="Drawdown Chart">
+    </div>
+
+    <div class="metrics-grid">
+        <div class="metric-card negative">
+            <div class="value">{{ "%.2f"|format(max_drawdown) }}%</div>
+            <div class="label">Max Drawdown</div>
+        </div>
+        <div class="metric-card">
+            <div class="value">{{ max_drawdown_date }}</div>
+            <div class="label">Max Drawdown Date</div>
+        </div>
+        <div class="metric-card {{ 'negative' if current_drawdown < 0 else 'positive' }}">
+            <div class="value">{{ "%.2f"|format(current_drawdown) }}%</div>
+            <div class="label">Current Drawdown</div>
+        </div>
+    </div>
+
+    {% if worst_periods %}
+    <h3>Worst Drawdown Periods</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Drawdown</th>
+                <th>Start</th>
+                <th>Trough</th>
+                <th>End</th>
+                <th>Days to Trough</th>
+                <th>Recovery Days</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for period in worst_periods %}
+            <tr>
+                <td class="text-negative">{{ "%.2f"|format(period.drawdown) }}%</td>
+                <td>{{ period.start }}</td>
+                <td>{{ period.trough }}</td>
+                <td>{{ period.end }}</td>
+                <td>{{ period.days_to_trough }}</td>
+                <td>{{ period.recovery_days if period.recovery_days else 'Ongoing' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>

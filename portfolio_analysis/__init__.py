@@ -28,6 +28,12 @@ try:
 except ImportError:
     InteractivePortfolioAnalyzer = None
 
+# Optional: HTML reporting (requires jinja2)
+try:
+    from portfolio_analysis.reporting import ReportBuilder
+except ImportError:
+    ReportBuilder = None
+
 __all__ = [
     "DataLoader",
     "PerformanceMetrics",
@@ -37,4 +43,5 @@ __all__ = [
     "PortfolioVisualization",
     "PortfolioOptimizer",
     "InteractivePortfolioAnalyzer",
+    "ReportBuilder",
 ]

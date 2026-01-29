@@ -1,0 +1,41 @@
+<div class="section">
+    <h2>Risk Analysis</h2>
+
+    <div class="three-column">
+        <div>
+            <h3>Return Metrics</h3>
+            <div style="background: white; border-radius: 6px; padding: 1rem; border: 1px solid var(--border-color);">
+                {% for metric in return_metrics %}
+                <div class="summary-row">
+                    <span class="name">{{ metric.name }}</span>
+                    <span class="value">{{ metric.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <h3>Risk Metrics</h3>
+            <div style="background: white; border-radius: 6px; padding: 1rem; border: 1px solid var(--border-color);">
+                {% for metric in risk_metrics %}
+                <div class="summary-row">
+                    <span class="name">{{ metric.name }}</span>
+                    <span class="value">{{ metric.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <h3>Ratios</h3>
+            <div style="background: white; border-radius: 6px; padding: 1rem; border: 1px solid var(--border-color);">
+                {% for metric in ratio_metrics %}
+                <div class="summary-row">
+                    <span class="name">{{ metric.name }}</span>
+                    <span class="value">{{ metric.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
