@@ -50,3 +50,6 @@ Thumbs.db
 # Private roadmap (pro features)
 .roadmap-pro.md
 .v2-implementation-plan.md
+
+# MkDocs build output
+site/
