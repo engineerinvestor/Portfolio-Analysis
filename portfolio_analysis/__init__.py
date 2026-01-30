@@ -34,6 +34,28 @@ try:
 except ImportError:
     ReportBuilder = None
 
+# Optional: Factor analysis (requires pandas-datareader)
+try:
+    from portfolio_analysis.factors import (
+        FactorDataLoader,
+        FactorModel,
+        RegressionResults,
+        FactorRegression,
+        FactorExposures,
+        FactorAttribution,
+        FactorOptimizer,
+        FactorVisualization,
+    )
+except ImportError:
+    FactorDataLoader = None
+    FactorModel = None
+    RegressionResults = None
+    FactorRegression = None
+    FactorExposures = None
+    FactorAttribution = None
+    FactorOptimizer = None
+    FactorVisualization = None
+
 __all__ = [
     "DataLoader",
     "PerformanceMetrics",
@@ -44,4 +66,12 @@ __all__ = [
     "PortfolioOptimizer",
     "InteractivePortfolioAnalyzer",
     "ReportBuilder",
+    "FactorDataLoader",
+    "FactorModel",
+    "RegressionResults",
+    "FactorRegression",
+    "FactorExposures",
+    "FactorAttribution",
+    "FactorOptimizer",
+    "FactorVisualization",
 ]

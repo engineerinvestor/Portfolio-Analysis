@@ -51,6 +51,9 @@ optimization = [
 interactive = [
     "ipywidgets>=7.6.0",
 ]
+factors = [
+    "pandas-datareader>=0.10.0",
+]
 streamlit = [
     "streamlit>=1.20.0",
     "plotly>=5.10.0",
@@ -63,7 +66,7 @@ dev = [
     "ruff>=0.1.0",
 ]
 all = [
-    "portfolio-analysis[optimization,interactive,streamlit,dev]",
+    "portfolio-analysis[optimization,interactive,factors,streamlit,dev]",
 ]
 
 [project.urls]
