@@ -13,6 +13,7 @@ Open-source portfolio analysis tools for DIY investors and finance enthusiasts. 
 **Google Colab Notebooks:**
 - [Basic Portfolio Analysis](https://colab.research.google.com/github/engineerinvestor/Portfolio-Analysis/blob/main/Basic_Portfolio_Analysis.ipynb) - Core analysis tutorial
 - [Interactive Portfolio Analysis](https://colab.research.google.com/github/engineerinvestor/Portfolio-Analysis/blob/main/Interactive_Portfolio_Analysis.ipynb) - Widget-based interface
+- [Factor Analysis Demo](https://colab.research.google.com/github/engineerinvestor/Portfolio-Analysis/blob/main/Factor_Analysis_Demo.ipynb) - Fama-French factor models
 
 ### Install as Python Package
 
@@ -53,6 +54,17 @@ streamlit run streamlit_app/app.py
 - Risk Parity (equal risk contribution)
 - Target Return optimization
 - Efficient Frontier visualization
+
+### Factor Analysis
+- **Fama-French Models**: CAPM, FF3, FF5, and Carhart 4-factor regressions
+- **Factor Data**: Auto-fetch from Kenneth French Data Library with local caching
+- **Return Attribution**: Decompose returns into factor contributions + alpha
+- **Risk Attribution**: Variance decomposition by systematic factor
+- **Rolling Analysis**: Time-varying factor exposures
+- **Characteristic Tilts**: Size, value, momentum, quality, investment tilts
+- **Factor Optimization**: Target specific factor exposures or neutralize factors
+
+![Factor Attribution](docs/images/return_attribution.png)
 
 ### HTML Tear Sheet Reports
 - Professional portfolio reports inspired by [QuantStats](https://github.com/ranaroussi/quantstats)
@@ -121,6 +133,41 @@ report = ReportBuilder(portfolio, benchmark=benchmark, title="60/40 Portfolio")
 report.generate("tearsheet_with_benchmark.html")
 ```
 
+### Factor Analysis
+
+```python
+from portfolio_analysis import DataLoader, PortfolioAnalysis
+from portfolio_analysis.factors import FactorDataLoader, FactorRegression, FactorAttribution
+
+# Load portfolio data
+loader = DataLoader(['VTI', 'VBR', 'VTV', 'BND'], '2019-01-01', '2024-01-01')
+data = loader.fetch_data()
+portfolio = PortfolioAnalysis(data, [0.4, 0.2, 0.2, 0.2])
+returns = portfolio.calculate_portfolio_returns()
+
+# Load Fama-French factors
+factor_loader = FactorDataLoader()
+ff3 = factor_loader.get_ff3_factors('2019-01-01', '2024-01-01')
+
+# Run factor regression
+regression = FactorRegression(returns, ff3)
+results = regression.run_regression('ff3')
+print(results.summary())
+# Output: Alpha, Market Beta, SMB, HML with t-stats and p-values
+
+# Decompose returns by factor
+attribution = FactorAttribution(returns, ff3)
+decomp = attribution.decompose_returns()
+print(f"Market contribution: {decomp['Mkt-RF']:.2%}")
+print(f"Alpha: {decomp['alpha']:.2%}")
+
+# Compare all factor models
+comparison = regression.compare_models()
+print(comparison)  # CAPM vs FF3 vs FF5 vs Carhart
+```
+
+![Rolling Betas](docs/images/rolling_betas.png)
+
 ## Repository Structure
 
 ```
@@ -129,16 +176,19 @@ Portfolio-Analysis/
 │   ├── data/                    # Data loading
 │   ├── metrics/                 # Performance & benchmark metrics
 │   ├── analysis/                # Portfolio & Monte Carlo analysis
+│   ├── factors/                 # Factor analysis (Fama-French, etc.)
 │   ├── visualization/           # Plotting & interactive widgets
 │   ├── reporting/               # HTML tear sheet generation
 │   └── utils/                   # Helper functions
 ├── streamlit_app/               # Web application
 │   └── app.py                   # Main Streamlit app
 ├── tests/                       # pytest test suite
+├── docs/images/                 # Documentation images
 ├── Tutorials/                   # Additional notebooks
 ├── Visualization/               # Visualization notebooks
 ├── Basic_Portfolio_Analysis.ipynb
 ├── Interactive_Portfolio_Analysis.ipynb
+├── Factor_Analysis_Demo.ipynb   # Factor analysis tutorial
 ├── pyproject.toml               # Package configuration
 └── requirements*.txt            # Dependencies
 ```
@@ -158,6 +208,11 @@ pip install "engineer-investor-portfolio[optimization]"
 ### With Interactive Widgets
 ```bash
 pip install "engineer-investor-portfolio[interactive]"
+```
+
+### With Factor Analysis
+```bash
+pip install "engineer-investor-portfolio[factors]"
 ```
 
 ### For Streamlit App
@@ -192,7 +247,7 @@ See also: [Beginner's Guide to Contributing](https://github.com/engineerinvestor
 - [x] Portfolio optimization
 - [x] Streamlit web application
 - [x] HTML tear sheet reports
-- [ ] Factor analysis (Fama-French, momentum, quality)
+- [x] Factor analysis (Fama-French, Carhart, return/risk attribution)
 - [ ] Time-varying risk-free rate (T-bill data)
 - [ ] Tax-loss harvesting tools
 - [ ] Comprehensive test coverage
