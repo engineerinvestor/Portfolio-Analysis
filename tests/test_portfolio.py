@@ -163,14 +163,14 @@ class TestHelpers:
 
     def test_validate_weights_valid(self):
         """Test valid weights."""
-        assert validate_weights([0.5, 0.3, 0.2]) is True
-        assert validate_weights([1.0]) is True
-        assert validate_weights([0.25, 0.25, 0.25, 0.25]) is True
+        assert validate_weights([0.5, 0.3, 0.2])
+        assert validate_weights([1.0])
+        assert validate_weights([0.25, 0.25, 0.25, 0.25])
 
     def test_validate_weights_invalid(self):
         """Test invalid weights."""
-        assert validate_weights([0.5, 0.3]) is False  # Sums to 0.8
-        assert validate_weights([0.5, 0.6]) is False  # Sums to 1.1
+        assert not validate_weights([0.5, 0.3])  # Sums to 0.8
+        assert not validate_weights([0.5, 0.6])  # Sums to 1.1
 
     def test_normalize_weights(self):
         """Test weight normalization."""
