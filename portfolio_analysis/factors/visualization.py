@@ -405,23 +405,31 @@ class FactorVisualization:
         values = [risk_decomp[k] for k in components]
         total = risk_decomp['total']
 
-        # Convert to percentages
-        percentages = [v / total * 100 if total > 0 else 0 for v in values]
+        # Convert to percentages (use absolute values for pie chart)
+        abs_values = [abs(v) for v in values]
+        abs_total = sum(abs_values) if sum(abs_values) > 0 else 1
+        percentages = [v / abs_total * 100 for v in abs_values]
+
+        # Create labels with +/- indicators for negative contributions
+        pie_labels = [
+            f"{c} (-)" if values[i] < 0 else c
+            for i, c in enumerate(components)
+        ]
 
         fig, axes = plt.subplots(1, 2, figsize=figsize)
 
-        # Pie chart
+        # Pie chart (using absolute values)
         ax = axes[0]
         colors = plt.cm.Set3(np.linspace(0, 1, len(components)))
         wedges, texts, autotexts = ax.pie(
             percentages,
-            labels=components,
+            labels=pie_labels,
             autopct='%1.1f%%',
             startangle=90,
             colors=colors,
             explode=[0.02] * len(components)
         )
-        ax.set_title('Variance Attribution (%)')
+        ax.set_title('Variance Attribution (absolute %)')
 
         # Bar chart with variance values
         ax = axes[1]
