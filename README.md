@@ -2,9 +2,15 @@
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://engineer-investor-portfolio-analysis.streamlit.app/)
 [![PyPI version](https://badge.fury.io/py/engineer-investor-portfolio.svg)](https://badge.fury.io/py/engineer-investor-portfolio)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://engineerinvestor.github.io/Portfolio-Analysis/)
+[![Tests](https://github.com/engineerinvestor/Portfolio-Analysis/actions/workflows/tests.yml/badge.svg)](https://github.com/engineerinvestor/Portfolio-Analysis/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Open-source portfolio analysis tools for DIY investors and finance enthusiasts. This repository aims to provide a comprehensive suite of tools to analyze and optimize investment portfolios, with an emphasis on transparency, flexibility, and extensibility.
+
+## Documentation
+
+**[Read the Full Documentation](https://engineerinvestor.github.io/Portfolio-Analysis/)** - Comprehensive guides, API reference, and examples.
 
 ## Quick Start
 
