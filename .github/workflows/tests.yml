@@ -58,7 +58,7 @@ jobs:
 
       - name: Install linters
         run: |
-          pip install black ruff
+          pip install black==24.1.1 ruff==0.1.14
 
       - name: Check formatting with Black
         run: black --check portfolio_analysis/
