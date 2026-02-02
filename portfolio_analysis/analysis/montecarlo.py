@@ -42,7 +42,7 @@ class MonteCarloSimulation:
         weights: List[float],
         num_simulations: int = 1000,
         time_horizon: int = 252,
-        initial_investment: float = 10000
+        initial_investment: float = 10000,
     ):
         self.data = data
         self.weights = np.array(weights)
@@ -90,10 +90,7 @@ class MonteCarloSimulation:
         self._results = results
         return results
 
-    def get_statistics(
-        self,
-        percentiles: List[int] = [5, 25, 50, 75, 95]
-    ) -> Dict:
+    def get_statistics(self, percentiles: List[int] = [5, 25, 50, 75, 95]) -> Dict:
         """
         Calculate statistics across all simulation paths.
 
@@ -114,28 +111,26 @@ class MonteCarloSimulation:
         final_values = results[:, -1]
 
         return {
-            'percentiles': {
-                p: np.percentile(results, p, axis=0) for p in percentiles
+            "percentiles": {p: np.percentile(results, p, axis=0) for p in percentiles},
+            "mean": np.mean(results, axis=0),
+            "std": np.std(results, axis=0),
+            "final_values": {
+                "mean": np.mean(final_values),
+                "median": np.median(final_values),
+                "std": np.std(final_values),
+                "min": np.min(final_values),
+                "max": np.max(final_values),
+                "percentile_5": np.percentile(final_values, 5),
+                "percentile_95": np.percentile(final_values, 95),
+                "prob_loss": np.mean(final_values < self.initial_investment) * 100,
             },
-            'mean': np.mean(results, axis=0),
-            'std': np.std(results, axis=0),
-            'final_values': {
-                'mean': np.mean(final_values),
-                'median': np.median(final_values),
-                'std': np.std(final_values),
-                'min': np.min(final_values),
-                'max': np.max(final_values),
-                'percentile_5': np.percentile(final_values, 5),
-                'percentile_95': np.percentile(final_values, 95),
-                'prob_loss': np.mean(final_values < self.initial_investment) * 100
-            }
         }
 
     def plot_simulation(
         self,
         show_percentiles: bool = True,
         num_paths: int = 100,
-        ax: Optional[plt.Axes] = None
+        ax: Optional[plt.Axes] = None,
     ) -> plt.Axes:
         """
         Plot Monte Carlo simulation results with percentile bands.
@@ -166,7 +161,7 @@ class MonteCarloSimulation:
         # Plot a subset of individual paths
         paths_to_plot = min(num_paths, self.num_simulations)
         for i in range(paths_to_plot):
-            ax.plot(results[i, :], color='lightblue', alpha=0.3, linewidth=0.5)
+            ax.plot(results[i, :], color="lightblue", alpha=0.3, linewidth=0.5)
 
         if show_percentiles:
             days = np.arange(self.time_horizon)
@@ -174,58 +169,64 @@ class MonteCarloSimulation:
             # Plot percentile bands
             ax.fill_between(
                 days,
-                stats['percentiles'][5],
-                stats['percentiles'][95],
-                color='blue', alpha=0.2, label='5th-95th percentile'
+                stats["percentiles"][5],
+                stats["percentiles"][95],
+                color="blue",
+                alpha=0.2,
+                label="5th-95th percentile",
             )
             ax.fill_between(
                 days,
-                stats['percentiles'][25],
-                stats['percentiles'][75],
-                color='blue', alpha=0.3, label='25th-75th percentile'
+                stats["percentiles"][25],
+                stats["percentiles"][75],
+                color="blue",
+                alpha=0.3,
+                label="25th-75th percentile",
             )
 
             # Plot median
             ax.plot(
-                stats['percentiles'][50],
-                color='darkblue',
+                stats["percentiles"][50],
+                color="darkblue",
                 linewidth=2,
-                label='Median (50th percentile)'
+                label="Median (50th percentile)",
             )
 
         # Plot initial investment line
         ax.axhline(
             y=self.initial_investment,
-            color='red',
-            linestyle='--',
+            color="red",
+            linestyle="--",
             linewidth=1,
-            label=f'Initial: ${self.initial_investment:,.0f}'
+            label=f"Initial: ${self.initial_investment:,.0f}",
         )
 
         ax.set_title(
-            f'Monte Carlo Simulation ({self.num_simulations:,} paths, {self.time_horizon} days)'
+            f"Monte Carlo Simulation ({self.num_simulations:,} paths, {self.time_horizon} days)"
         )
-        ax.set_xlabel('Trading Days')
-        ax.set_ylabel('Portfolio Value ($)')
-        ax.legend(loc='upper left')
+        ax.set_xlabel("Trading Days")
+        ax.set_ylabel("Portfolio Value ($)")
+        ax.legend(loc="upper left")
         ax.grid(True, alpha=0.3)
 
         # Add summary statistics text box
-        final_stats = stats['final_values']
+        final_stats = stats["final_values"]
         textstr = f"Final Value Statistics:\n"
         textstr += f"Median: ${final_stats['median']:,.0f}\n"
         textstr += f"5th %: ${final_stats['percentile_5']:,.0f}\n"
         textstr += f"95th %: ${final_stats['percentile_95']:,.0f}\n"
         textstr += f"Prob. of Loss: {final_stats['prob_loss']:.1f}%"
 
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.8)
+        props = dict(boxstyle="round", facecolor="wheat", alpha=0.8)
         ax.text(
-            0.98, 0.02, textstr,
+            0.98,
+            0.02,
+            textstr,
             transform=ax.transAxes,
             fontsize=9,
-            verticalalignment='bottom',
-            horizontalalignment='right',
-            bbox=props
+            verticalalignment="bottom",
+            horizontalalignment="right",
+            bbox=props,
         )
 
         return ax
@@ -236,25 +237,25 @@ class MonteCarloSimulation:
             self.simulate()
 
         stats = self.get_statistics()
-        final = stats['final_values']
+        final = stats["final_values"]
 
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("MONTE CARLO SIMULATION SUMMARY")
-        print("="*50)
+        print("=" * 50)
         print(f"Initial Investment: ${self.initial_investment:,.0f}")
         print(f"Time Horizon: {self.time_horizon} trading days")
         print(f"Number of Simulations: {self.num_simulations:,}")
-        print("-"*50)
+        print("-" * 50)
         print("Final Portfolio Value Statistics:")
         print(f"  Mean:     ${final['mean']:,.0f}")
         print(f"  Median:   ${final['median']:,.0f}")
         print(f"  Std Dev:  ${final['std']:,.0f}")
         print(f"  Min:      ${final['min']:,.0f}")
         print(f"  Max:      ${final['max']:,.0f}")
-        print("-"*50)
+        print("-" * 50)
         print("Percentile Projections:")
         print(f"  5th percentile:  ${final['percentile_5']:,.0f}")
         print(f"  95th percentile: ${final['percentile_95']:,.0f}")
-        print("-"*50)
+        print("-" * 50)
         print(f"Probability of Loss: {final['prob_loss']:.1f}%")
-        print("="*50)
+        print("=" * 50)

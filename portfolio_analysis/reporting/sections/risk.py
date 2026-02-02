@@ -34,7 +34,7 @@ class RiskSection(ReportSection):
         self,
         portfolio: PortfolioAnalysis,
         template: Template,
-        risk_free_rate: float = 0.02
+        risk_free_rate: float = 0.02,
     ):
         super().__init__(template)
         self.portfolio = portfolio
@@ -55,7 +55,9 @@ class RiskSection(ReportSection):
         cumulative = self.portfolio.calculate_cumulative_returns()
 
         # Calculate years
-        years = (self.portfolio.data.index[-1] - self.portfolio.data.index[0]).days / 365.25
+        years = (
+            self.portfolio.data.index[-1] - self.portfolio.data.index[0]
+        ).days / 365.25
 
         # CAGR
         cagr = (cumulative.iloc[-1] ** (1 / years)) - 1 if years > 0 else 0
@@ -89,7 +91,10 @@ class RiskSection(ReportSection):
 
         # Risk metrics table
         risk_metrics = [
-            {"name": "Annual Volatility", "value": f"{summary['annual_volatility'] * 100:.2f}%"},
+            {
+                "name": "Annual Volatility",
+                "value": f"{summary['annual_volatility'] * 100:.2f}%",
+            },
             {"name": "Max Drawdown", "value": f"{summary['max_drawdown'] * 100:.2f}%"},
             {"name": "VaR (95%)", "value": f"{var_95 * 100:.2f}%"},
             {"name": "CVaR (95%)", "value": f"{cvar_95 * 100:.2f}%"},
@@ -99,9 +104,15 @@ class RiskSection(ReportSection):
 
         # Return metrics table
         return_metrics = [
-            {"name": "Total Return", "value": f"{(cumulative.iloc[-1] - 1) * 100:.2f}%"},
+            {
+                "name": "Total Return",
+                "value": f"{(cumulative.iloc[-1] - 1) * 100:.2f}%",
+            },
             {"name": "CAGR", "value": f"{cagr * 100:.2f}%"},
-            {"name": "Annual Return", "value": f"{summary['annual_return'] * 100:.2f}%"},
+            {
+                "name": "Annual Return",
+                "value": f"{summary['annual_return'] * 100:.2f}%",
+            },
             {"name": "Avg Daily Return", "value": f"{returns.mean() * 100:.4f}%"},
             {"name": "Avg Gain (daily)", "value": f"{avg_gain * 100:.4f}%"},
             {"name": "Avg Loss (daily)", "value": f"{avg_loss * 100:.4f}%"},

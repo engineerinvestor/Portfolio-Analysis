@@ -37,12 +37,15 @@ class PerformanceSection(ReportSection):
         fig, ax = create_figure(figsize=(12, 5))
 
         ax.plot(cumulative.index, cumulative.values, linewidth=1.5, color="#1f77b4")
-        ax.fill_between(cumulative.index, 1, cumulative.values,
-                        alpha=0.2, color="#1f77b4")
+        ax.fill_between(
+            cumulative.index, 1, cumulative.values, alpha=0.2, color="#1f77b4"
+        )
 
         ax.axhline(y=1, color="gray", linestyle="--", linewidth=0.8, alpha=0.5)
 
-        ax.set_title("Cumulative Returns (Growth of $1)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            "Cumulative Returns (Growth of $1)", fontsize=12, fontweight="bold"
+        )
         ax.set_xlabel("Date", fontsize=10)
         ax.set_ylabel("Value", fontsize=10)
         ax.grid(True, alpha=0.3)

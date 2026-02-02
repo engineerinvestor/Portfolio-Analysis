@@ -37,10 +37,20 @@ class BenchmarkSection(ReportSection):
 
         fig, ax = create_figure(figsize=(12, 5))
 
-        ax.plot(portfolio_cum.index, portfolio_cum.values,
-                linewidth=1.5, color="#1f77b4", label="Portfolio")
-        ax.plot(benchmark_cum.index, benchmark_cum.values,
-                linewidth=1.5, color="#ff7f0e", label=f"Benchmark ({self.benchmark.benchmark_ticker})")
+        ax.plot(
+            portfolio_cum.index,
+            portfolio_cum.values,
+            linewidth=1.5,
+            color="#1f77b4",
+            label="Portfolio",
+        )
+        ax.plot(
+            benchmark_cum.index,
+            benchmark_cum.values,
+            linewidth=1.5,
+            color="#ff7f0e",
+            label=f"Benchmark ({self.benchmark.benchmark_ticker})",
+        )
 
         ax.axhline(y=1, color="gray", linestyle="--", linewidth=0.8, alpha=0.5)
 
@@ -67,14 +77,17 @@ class BenchmarkSection(ReportSection):
         rf_daily = self.benchmark.risk_free_rate / 252
 
         for i in range(window, len(portfolio_returns)):
-            port_window = portfolio_returns.iloc[i-window:i]
-            bench_window = benchmark_returns.iloc[i-window:i]
+            port_window = portfolio_returns.iloc[i - window : i]
+            bench_window = benchmark_returns.iloc[i - window : i]
 
             cov = np.cov(port_window, bench_window)[0, 1]
             var = np.var(bench_window)
             beta = cov / var if var > 0 else 0
 
-            alpha = (port_window.mean() - (rf_daily + beta * (bench_window.mean() - rf_daily))) * 252
+            alpha = (
+                port_window.mean()
+                - (rf_daily + beta * (bench_window.mean() - rf_daily))
+            ) * 252
 
             rolling_beta.append(beta)
             rolling_alpha.append(alpha)
@@ -89,10 +102,14 @@ class BenchmarkSection(ReportSection):
         axes[0].plot(dates, rolling_beta, linewidth=1.2, color="#1f77b4")
         axes[0].axhline(y=1.0, color="#d62728", linestyle="--", linewidth=1, alpha=0.7)
         axes[0].set_ylabel("Beta", fontsize=10)
-        axes[0].set_title(f"Rolling {window}-Day Beta and Alpha", fontsize=12, fontweight="bold")
+        axes[0].set_title(
+            f"Rolling {window}-Day Beta and Alpha", fontsize=12, fontweight="bold"
+        )
         axes[0].grid(True, alpha=0.3)
 
-        axes[1].plot(dates, [a * 100 for a in rolling_alpha], linewidth=1.2, color="#2ca02c")
+        axes[1].plot(
+            dates, [a * 100 for a in rolling_alpha], linewidth=1.2, color="#2ca02c"
+        )
         axes[1].axhline(y=0, color="#d62728", linestyle="--", linewidth=1, alpha=0.7)
         axes[1].set_ylabel("Alpha (%)", fontsize=10)
         axes[1].set_xlabel("Date", fontsize=10)
@@ -107,8 +124,7 @@ class BenchmarkSection(ReportSection):
 
         # Get benchmark name
         benchmark_name = self.benchmark.BENCHMARKS.get(
-            self.benchmark.benchmark_ticker,
-            self.benchmark.benchmark_ticker
+            self.benchmark.benchmark_ticker, self.benchmark.benchmark_ticker
         )
 
         # Performance difference
@@ -119,15 +135,30 @@ class BenchmarkSection(ReportSection):
 
         # Build metrics tables
         return_metrics = [
-            {"name": "Portfolio Annual Return", "value": f"{metrics['portfolio_return'] * 100:.2f}%"},
-            {"name": "Benchmark Annual Return", "value": f"{metrics['benchmark_return'] * 100:.2f}%"},
+            {
+                "name": "Portfolio Annual Return",
+                "value": f"{metrics['portfolio_return'] * 100:.2f}%",
+            },
+            {
+                "name": "Benchmark Annual Return",
+                "value": f"{metrics['benchmark_return'] * 100:.2f}%",
+            },
             {"name": "Outperformance", "value": f"{performance_diff * 100:+.2f}%"},
         ]
 
         risk_metrics = [
-            {"name": "Portfolio Volatility", "value": f"{metrics['portfolio_volatility'] * 100:.2f}%"},
-            {"name": "Benchmark Volatility", "value": f"{metrics['benchmark_volatility'] * 100:.2f}%"},
-            {"name": "Tracking Error", "value": f"{metrics['tracking_error'] * 100:.2f}%"},
+            {
+                "name": "Portfolio Volatility",
+                "value": f"{metrics['portfolio_volatility'] * 100:.2f}%",
+            },
+            {
+                "name": "Benchmark Volatility",
+                "value": f"{metrics['benchmark_volatility'] * 100:.2f}%",
+            },
+            {
+                "name": "Tracking Error",
+                "value": f"{metrics['tracking_error'] * 100:.2f}%",
+            },
         ]
 
         capm_metrics = [
@@ -138,7 +169,10 @@ class BenchmarkSection(ReportSection):
         ]
 
         performance_metrics = [
-            {"name": "Information Ratio", "value": f"{metrics['information_ratio']:.3f}"},
+            {
+                "name": "Information Ratio",
+                "value": f"{metrics['information_ratio']:.3f}",
+            },
             {"name": "Up Capture", "value": f"{metrics['up_capture']:.1f}%"},
             {"name": "Down Capture", "value": f"{metrics['down_capture']:.1f}%"},
         ]

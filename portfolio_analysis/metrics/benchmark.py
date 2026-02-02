@@ -35,22 +35,22 @@ class BenchmarkComparison:
     """
 
     BENCHMARKS = {
-        'SPY': 'S&P 500 (US Large Cap)',
-        'VTI': 'Total US Stock Market',
-        'BND': 'Total US Bond Market',
-        'VT': 'Total World Stock Market',
-        'QQQ': 'NASDAQ 100',
-        'IWM': 'Russell 2000 (US Small Cap)',
-        'EFA': 'Developed Markets ex-US',
-        'AGG': 'US Aggregate Bond'
+        "SPY": "S&P 500 (US Large Cap)",
+        "VTI": "Total US Stock Market",
+        "BND": "Total US Bond Market",
+        "VT": "Total World Stock Market",
+        "QQQ": "NASDAQ 100",
+        "IWM": "Russell 2000 (US Small Cap)",
+        "EFA": "Developed Markets ex-US",
+        "AGG": "US Aggregate Bond",
     }
 
     def __init__(
         self,
         portfolio_data: pd.DataFrame,
         weights: List[float],
-        benchmark_ticker: str = 'SPY',
-        risk_free_rate: float = 0.02
+        benchmark_ticker: str = "SPY",
+        risk_free_rate: float = 0.02,
     ):
         self.portfolio_data = portfolio_data
         self.weights = np.array(weights)
@@ -66,7 +66,9 @@ class BenchmarkComparison:
         self.benchmark_returns = self.benchmark_data.pct_change().dropna()
 
         # Align dates
-        common_dates = self.portfolio_returns.index.intersection(self.benchmark_returns.index)
+        common_dates = self.portfolio_returns.index.intersection(
+            self.benchmark_returns.index
+        )
         self.portfolio_returns = self.portfolio_returns.loc[common_dates]
         self.benchmark_returns = self.benchmark_returns.loc[common_dates]
 
@@ -76,29 +78,30 @@ class BenchmarkComparison:
         end_date = self.portfolio_data.index.max()
 
         raw_data = yf.download(
-            self.benchmark_ticker,
-            start=start_date,
-            end=end_date,
-            progress=False
+            self.benchmark_ticker, start=start_date, end=end_date, progress=False
         )
 
         # Handle yfinance column format changes across versions
         # Check for MultiIndex columns (yfinance >= 0.2.40)
         if isinstance(raw_data.columns, pd.MultiIndex):
             price_types = raw_data.columns.get_level_values(0).unique()
-            if 'Adj Close' in price_types:
-                benchmark = raw_data['Adj Close']
-            elif 'Close' in price_types:
-                benchmark = raw_data['Close']
+            if "Adj Close" in price_types:
+                benchmark = raw_data["Adj Close"]
+            elif "Close" in price_types:
+                benchmark = raw_data["Close"]
             else:
-                raise ValueError(f"No Close or Adj Close column found. Available: {price_types.tolist()}")
+                raise ValueError(
+                    f"No Close or Adj Close column found. Available: {price_types.tolist()}"
+                )
         else:
-            if 'Adj Close' in raw_data.columns:
-                benchmark = raw_data['Adj Close']
-            elif 'Close' in raw_data.columns:
-                benchmark = raw_data['Close']
+            if "Adj Close" in raw_data.columns:
+                benchmark = raw_data["Adj Close"]
+            elif "Close" in raw_data.columns:
+                benchmark = raw_data["Close"]
             else:
-                raise ValueError(f"No Close or Adj Close column found. Available: {raw_data.columns.tolist()}")
+                raise ValueError(
+                    f"No Close or Adj Close column found. Available: {raw_data.columns.tolist()}"
+                )
 
         # Ensure we return a Series, not a DataFrame
         if isinstance(benchmark, pd.DataFrame):
@@ -139,7 +142,9 @@ class BenchmarkComparison:
 
     def calculate_information_ratio(self) -> float:
         """Calculate information ratio."""
-        active_return = (self.portfolio_returns.mean() - self.benchmark_returns.mean()) * 252
+        active_return = (
+            self.portfolio_returns.mean() - self.benchmark_returns.mean()
+        ) * 252
         tracking_error = self.calculate_tracking_error(annualized=True)
 
         if tracking_error == 0:
@@ -180,40 +185,44 @@ class BenchmarkComparison:
     def get_metrics(self) -> dict:
         """Get all benchmark comparison metrics as a dictionary."""
         return {
-            'beta': self.calculate_beta(),
-            'alpha': self.calculate_alpha(),
-            'tracking_error': self.calculate_tracking_error(),
-            'information_ratio': self.calculate_information_ratio(),
-            'correlation': self.calculate_correlation(),
-            'r_squared': self.calculate_r_squared(),
-            'up_capture': self.calculate_up_capture(),
-            'down_capture': self.calculate_down_capture(),
-            'portfolio_return': self.portfolio_returns.mean() * 252,
-            'benchmark_return': self.benchmark_returns.mean() * 252,
-            'portfolio_volatility': self.portfolio_returns.std() * np.sqrt(252),
-            'benchmark_volatility': self.benchmark_returns.std() * np.sqrt(252),
+            "beta": self.calculate_beta(),
+            "alpha": self.calculate_alpha(),
+            "tracking_error": self.calculate_tracking_error(),
+            "information_ratio": self.calculate_information_ratio(),
+            "correlation": self.calculate_correlation(),
+            "r_squared": self.calculate_r_squared(),
+            "up_capture": self.calculate_up_capture(),
+            "down_capture": self.calculate_down_capture(),
+            "portfolio_return": self.portfolio_returns.mean() * 252,
+            "benchmark_return": self.benchmark_returns.mean() * 252,
+            "portfolio_volatility": self.portfolio_returns.std() * np.sqrt(252),
+            "benchmark_volatility": self.benchmark_returns.std() * np.sqrt(252),
         }
 
     def generate_report(self) -> None:
         """Print a comprehensive comparison report."""
         metrics = self.get_metrics()
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("BENCHMARK COMPARISON REPORT")
-        print("="*60)
+        print("=" * 60)
         print(f"Benchmark: {self.benchmark_ticker}", end="")
         if self.benchmark_ticker in self.BENCHMARKS:
             print(f" ({self.BENCHMARKS[self.benchmark_ticker]})")
         else:
             print()
-        print(f"Period: {self.portfolio_returns.index.min().strftime('%Y-%m-%d')} to "
-              f"{self.portfolio_returns.index.max().strftime('%Y-%m-%d')}")
-        print("-"*60)
+        print(
+            f"Period: {self.portfolio_returns.index.min().strftime('%Y-%m-%d')} to "
+            f"{self.portfolio_returns.index.max().strftime('%Y-%m-%d')}"
+        )
+        print("-" * 60)
 
         print("\nAnnualized Returns:")
         print(f"  Portfolio:  {metrics['portfolio_return']*100:.2f}%")
         print(f"  Benchmark:  {metrics['benchmark_return']*100:.2f}%")
-        print(f"  Difference: {(metrics['portfolio_return']-metrics['benchmark_return'])*100:+.2f}%")
+        print(
+            f"  Difference: {(metrics['portfolio_return']-metrics['benchmark_return'])*100:+.2f}%"
+        )
 
         print("\nAnnualized Volatility:")
         print(f"  Portfolio:  {metrics['portfolio_volatility']*100:.2f}%")
@@ -230,7 +239,7 @@ class BenchmarkComparison:
         print(f"  Information Ratio: {metrics['information_ratio']:.3f}")
         print(f"  Up Capture:        {metrics['up_capture']:.1f}%")
         print(f"  Down Capture:      {metrics['down_capture']:.1f}%")
-        print("="*60)
+        print("=" * 60)
 
     def plot_cumulative_returns(self, initial_value: float = 10000) -> None:
         """Plot cumulative returns comparison."""
@@ -239,14 +248,24 @@ class BenchmarkComparison:
 
         plt.figure(figsize=(12, 6))
 
-        plt.plot(portfolio_cum.index, portfolio_cum.values,
-                label='Portfolio', linewidth=2, color='blue')
-        plt.plot(benchmark_cum.index, benchmark_cum.values,
-                label=f'Benchmark ({self.benchmark_ticker})', linewidth=2, color='orange')
+        plt.plot(
+            portfolio_cum.index,
+            portfolio_cum.values,
+            label="Portfolio",
+            linewidth=2,
+            color="blue",
+        )
+        plt.plot(
+            benchmark_cum.index,
+            benchmark_cum.values,
+            label=f"Benchmark ({self.benchmark_ticker})",
+            linewidth=2,
+            color="orange",
+        )
 
-        plt.title('Cumulative Returns: Portfolio vs Benchmark')
-        plt.xlabel('Date')
-        plt.ylabel(f'Value (starting from ${initial_value:,.0f})')
+        plt.title("Cumulative Returns: Portfolio vs Benchmark")
+        plt.xlabel("Date")
+        plt.ylabel(f"Value (starting from ${initial_value:,.0f})")
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
@@ -261,31 +280,40 @@ class BenchmarkComparison:
         dates = []
 
         for i in range(window, len(self.portfolio_returns)):
-            port_window = self.portfolio_returns.iloc[i-window:i]
-            bench_window = self.benchmark_returns.iloc[i-window:i]
+            port_window = self.portfolio_returns.iloc[i - window : i]
+            bench_window = self.benchmark_returns.iloc[i - window : i]
 
             cov = np.cov(port_window, bench_window)[0, 1]
             var = np.var(bench_window)
             beta = cov / var
 
             rf_daily = self.risk_free_rate / 252
-            alpha = (port_window.mean() - (rf_daily + beta * (bench_window.mean() - rf_daily))) * 252
+            alpha = (
+                port_window.mean()
+                - (rf_daily + beta * (bench_window.mean() - rf_daily))
+            ) * 252
 
             rolling_beta.append(beta)
             rolling_alpha.append(alpha)
             dates.append(self.portfolio_returns.index[i])
 
-        axes[0].plot(dates, rolling_beta, linewidth=1.5, color='blue')
-        axes[0].axhline(y=1.0, color='red', linestyle='--', linewidth=1, label='Beta = 1.0')
-        axes[0].set_ylabel('Beta')
-        axes[0].set_title(f'Rolling {window}-Day Beta and Alpha')
+        axes[0].plot(dates, rolling_beta, linewidth=1.5, color="blue")
+        axes[0].axhline(
+            y=1.0, color="red", linestyle="--", linewidth=1, label="Beta = 1.0"
+        )
+        axes[0].set_ylabel("Beta")
+        axes[0].set_title(f"Rolling {window}-Day Beta and Alpha")
         axes[0].legend()
         axes[0].grid(True, alpha=0.3)
 
-        axes[1].plot(dates, [a * 100 for a in rolling_alpha], linewidth=1.5, color='green')
-        axes[1].axhline(y=0, color='red', linestyle='--', linewidth=1, label='Alpha = 0')
-        axes[1].set_ylabel('Alpha (%)')
-        axes[1].set_xlabel('Date')
+        axes[1].plot(
+            dates, [a * 100 for a in rolling_alpha], linewidth=1.5, color="green"
+        )
+        axes[1].axhline(
+            y=0, color="red", linestyle="--", linewidth=1, label="Alpha = 0"
+        )
+        axes[1].set_ylabel("Alpha (%)")
+        axes[1].set_xlabel("Date")
         axes[1].legend()
         axes[1].grid(True, alpha=0.3)
 

@@ -24,7 +24,9 @@ except ImportError:
 
 # Optional: interactive widgets (requires ipywidgets)
 try:
-    from portfolio_analysis.visualization.interactive import InteractivePortfolioAnalyzer
+    from portfolio_analysis.visualization.interactive import (
+        InteractivePortfolioAnalyzer,
+    )
 except ImportError:
     InteractivePortfolioAnalyzer = None
 

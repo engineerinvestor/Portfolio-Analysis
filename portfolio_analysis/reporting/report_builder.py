@@ -72,7 +72,7 @@ class ReportBuilder:
         benchmark: Optional[BenchmarkComparison] = None,
         title: Optional[str] = None,
         tickers: Optional[List[str]] = None,
-        risk_free_rate: float = 0.02
+        risk_free_rate: float = 0.02,
     ):
         self.portfolio = portfolio
         self.benchmark = benchmark
@@ -83,11 +83,10 @@ class ReportBuilder:
         # Set up Jinja2 environment
         templates_dir = Path(__file__).parent / "templates"
         self.env = Environment(
-            loader=FileSystemLoader([
-                str(templates_dir),
-                str(templates_dir / "sections")
-            ]),
-            autoescape=True
+            loader=FileSystemLoader(
+                [str(templates_dir), str(templates_dir / "sections")]
+            ),
+            autoescape=True,
         )
 
     def _load_template(self, name: str) -> Template:
@@ -103,28 +102,23 @@ class ReportBuilder:
             self.portfolio,
             self._load_template("header.html"),
             title=self.title,
-            tickers=self.tickers
+            tickers=self.tickers,
         )
         sections.append(header.render())
 
         # Performance section
         performance = PerformanceSection(
-            self.portfolio,
-            self._load_template("performance.html")
+            self.portfolio, self._load_template("performance.html")
         )
         sections.append(performance.render())
 
         # Drawdown section
-        drawdown = DrawdownSection(
-            self.portfolio,
-            self._load_template("drawdown.html")
-        )
+        drawdown = DrawdownSection(self.portfolio, self._load_template("drawdown.html"))
         sections.append(drawdown.render())
 
         # Returns heatmap section
         returns = ReturnsSection(
-            self.portfolio,
-            self._load_template("returns_heatmap.html")
+            self.portfolio, self._load_template("returns_heatmap.html")
         )
         sections.append(returns.render())
 
@@ -132,15 +126,14 @@ class ReportBuilder:
         risk = RiskSection(
             self.portfolio,
             self._load_template("risk_metrics.html"),
-            risk_free_rate=self.risk_free_rate
+            risk_free_rate=self.risk_free_rate,
         )
         sections.append(risk.render())
 
         # Benchmark section (optional)
         if self.benchmark is not None:
             benchmark_section = BenchmarkSection(
-                self.benchmark,
-                self._load_template("benchmark.html")
+                self.benchmark, self._load_template("benchmark.html")
             )
             sections.append(benchmark_section.render())
 
@@ -168,7 +161,7 @@ class ReportBuilder:
         html_content = base_template.render(
             title=self.title,
             content=section_html,
-            generation_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            generation_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
 
         # Write to file
@@ -194,5 +187,5 @@ class ReportBuilder:
         return base_template.render(
             title=self.title,
             content=section_html,
-            generation_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            generation_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
