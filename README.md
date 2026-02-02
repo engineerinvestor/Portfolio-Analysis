@@ -265,6 +265,20 @@ See also: [Beginner's Guide to Contributing](https://github.com/engineerinvestor
 - [PyPortfolioOpt](https://github.com/robertmartin8/PyPortfolioOpt) - Portfolio optimization
 - [Riskfolio-Lib](https://riskfolio-lib.readthedocs.io/) - Portfolio optimization and risk management
 
+## Citation
+
+If you use this package in academic work, please cite:
+
+```bibtex
+@software{engineer_investor_portfolio_analysis,
+  author       = {Engineer Investor},
+  title        = {Portfolio-Analysis: Open-source portfolio analysis tools for DIY investors},
+  year         = {2026},
+  publisher    = {GitHub},
+  url          = {https://github.com/engineerinvestor/Portfolio-Analysis}
+}
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
