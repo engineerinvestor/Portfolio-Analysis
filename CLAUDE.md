@@ -120,3 +120,9 @@ ruff check portfolio_analysis/
 - Validate inputs (weights sum to 1.0, matching array lengths)
 - Handle single-ticker edge cases (Series vs DataFrame)
 - Use constants for magic numbers (TRADING_DAYS = 252)
+
+## Git Commit Attribution
+
+All commits must be attributed to:
+- **Name:** Engineer Investor
+- **Email:** egr.investor@gmail.com
