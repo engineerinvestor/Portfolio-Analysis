@@ -2,15 +2,13 @@
 Drawdown section for portfolio tear sheet.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from jinja2 import Template
 
 from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
-from portfolio_analysis.reporting.chart_utils import fig_to_base64, create_figure
+from portfolio_analysis.reporting.chart_utils import create_figure, fig_to_base64
 from portfolio_analysis.reporting.sections.base import ReportSection
 
 
@@ -42,7 +40,7 @@ class DrawdownSection(ReportSection):
         drawdown = (cumulative / peak) - 1
         return drawdown
 
-    def _find_worst_drawdowns(self) -> List[Dict[str, Any]]:
+    def _find_worst_drawdowns(self) -> list[dict[str, Any]]:
         """Find the worst drawdown periods."""
         cumulative = self.portfolio.calculate_cumulative_returns()
         peak = cumulative.expanding(min_periods=1).max()
@@ -118,7 +116,7 @@ class DrawdownSection(ReportSection):
         fig.tight_layout()
         return fig_to_base64(fig)
 
-    def compute_data(self) -> Dict[str, Any]:
+    def compute_data(self) -> dict[str, Any]:
         """Compute drawdown section data."""
         drawdown = self._calculate_drawdown_series()
         max_dd = drawdown.min()

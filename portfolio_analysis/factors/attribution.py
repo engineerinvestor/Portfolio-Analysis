@@ -2,9 +2,10 @@
 Factor-based return and risk attribution for portfolio analysis.
 """
 
+from typing import Optional, Union
+
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional, Union
 
 from portfolio_analysis.factors.data import align_returns_with_factors
 from portfolio_analysis.factors.models import FactorModel, FactorRegression
@@ -70,7 +71,7 @@ class FactorAttribution:
 
     def decompose_returns(
         self, model: Union[str, FactorModel] = "ff3"
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Decompose total returns into factor contributions.
 
@@ -123,7 +124,7 @@ class FactorAttribution:
 
     def decompose_risk(
         self, model: Union[str, FactorModel] = "ff3"
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Decompose portfolio variance into factor contributions.
 

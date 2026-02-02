@@ -9,14 +9,14 @@ This module provides tools for:
 - Factor-aware portfolio optimization
 """
 
+from portfolio_analysis.factors.attribution import FactorAttribution
 from portfolio_analysis.factors.data import FactorDataLoader
+from portfolio_analysis.factors.exposures import FactorExposures
 from portfolio_analysis.factors.models import (
     FactorModel,
-    RegressionResults,
     FactorRegression,
+    RegressionResults,
 )
-from portfolio_analysis.factors.exposures import FactorExposures
-from portfolio_analysis.factors.attribution import FactorAttribution
 from portfolio_analysis.factors.optimization import FactorOptimizer
 from portfolio_analysis.factors.visualization import FactorVisualization
 

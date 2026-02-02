@@ -2,9 +2,10 @@
 Performance metrics calculations for financial data.
 """
 
+from typing import Union
+
 import numpy as np
 import pandas as pd
-from typing import Union
 
 
 class PerformanceMetrics:

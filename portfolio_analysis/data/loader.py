@@ -2,10 +2,11 @@
 Data loading functionality for fetching financial data.
 """
 
+from datetime import datetime
+from typing import Union
+
 import pandas as pd
 import yfinance as yf
-from typing import List, Optional, Union
-from datetime import datetime
 
 
 class DataLoader:
@@ -29,7 +30,7 @@ class DataLoader:
 
     def __init__(
         self,
-        tickers: List[str],
+        tickers: list[str],
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
     ):

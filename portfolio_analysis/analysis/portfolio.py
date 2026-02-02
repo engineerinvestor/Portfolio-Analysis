@@ -4,7 +4,6 @@ Core portfolio analysis functionality.
 
 import numpy as np
 import pandas as pd
-from typing import List, Union
 
 
 class PortfolioAnalysis:
@@ -28,7 +27,7 @@ class PortfolioAnalysis:
 
     TRADING_DAYS = 252
 
-    def __init__(self, data: pd.DataFrame, weights: List[float]):
+    def __init__(self, data: pd.DataFrame, weights: list[float]):
         self.data = data
         self.weights = np.array(weights)
 

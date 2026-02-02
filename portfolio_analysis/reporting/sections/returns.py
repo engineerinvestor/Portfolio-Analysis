@@ -2,7 +2,7 @@
 Returns section with monthly heatmap for portfolio tear sheet.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,7 +10,7 @@ import pandas as pd
 from jinja2 import Template
 
 from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
-from portfolio_analysis.reporting.chart_utils import fig_to_base64, create_figure
+from portfolio_analysis.reporting.chart_utils import fig_to_base64
 from portfolio_analysis.reporting.sections.base import ReportSection
 
 
@@ -112,7 +112,7 @@ class ReturnsSection(ReportSection):
         fig.tight_layout()
         return fig_to_base64(fig)
 
-    def compute_data(self) -> Dict[str, Any]:
+    def compute_data(self) -> dict[str, Any]:
         """Compute returns section data."""
         returns = self.portfolio.calculate_portfolio_returns()
         # Use 'M' and 'Y' for pandas < 2.2 compatibility

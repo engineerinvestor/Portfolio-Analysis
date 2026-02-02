@@ -7,18 +7,18 @@ by Ran Aroussi.
 
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from jinja2 import Environment, FileSystemLoader, Template
 
 from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
 from portfolio_analysis.metrics.benchmark import BenchmarkComparison
+from portfolio_analysis.reporting.sections.benchmark import BenchmarkSection
+from portfolio_analysis.reporting.sections.drawdown import DrawdownSection
 from portfolio_analysis.reporting.sections.header import HeaderSection
 from portfolio_analysis.reporting.sections.performance import PerformanceSection
-from portfolio_analysis.reporting.sections.drawdown import DrawdownSection
 from portfolio_analysis.reporting.sections.returns import ReturnsSection
 from portfolio_analysis.reporting.sections.risk import RiskSection
-from portfolio_analysis.reporting.sections.benchmark import BenchmarkSection
 
 
 class ReportBuilder:
@@ -71,7 +71,7 @@ class ReportBuilder:
         portfolio: PortfolioAnalysis,
         benchmark: Optional[BenchmarkComparison] = None,
         title: Optional[str] = None,
-        tickers: Optional[List[str]] = None,
+        tickers: Optional[list[str]] = None,
         risk_free_rate: float = 0.02,
     ):
         self.portfolio = portfolio
@@ -93,7 +93,7 @@ class ReportBuilder:
         """Load a template by name."""
         return self.env.get_template(name)
 
-    def _build_sections(self) -> List[str]:
+    def _build_sections(self) -> list[str]:
         """Build all report sections and return their HTML."""
         sections = []
 

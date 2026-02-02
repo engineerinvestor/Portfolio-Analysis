@@ -2,12 +2,11 @@
 Factor data loading functionality for Fama-French factor models.
 """
 
-import pandas as pd
-import numpy as np
-from typing import Optional, Union
-from datetime import datetime
 import os
-import hashlib
+from datetime import datetime
+from typing import Optional, Union
+
+import pandas as pd
 
 
 class FactorDataLoader:
