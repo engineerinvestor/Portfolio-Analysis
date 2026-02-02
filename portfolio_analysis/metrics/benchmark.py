@@ -80,9 +80,7 @@ class BenchmarkComparison:
 
         weight_sum = np.sum(self.weights)
         if not np.isclose(weight_sum, 1.0, atol=WEIGHT_SUM_TOLERANCE):
-            raise ValidationError(
-                f"Weights must sum to 1.0, got {weight_sum:.6f}"
-            )
+            raise ValidationError(f"Weights must sum to 1.0, got {weight_sum:.6f}")
 
         # Fetch benchmark data
         self.benchmark_data = self._fetch_benchmark()
@@ -218,8 +216,10 @@ class BenchmarkComparison:
             "down_capture": self.calculate_down_capture(),
             "portfolio_return": self.portfolio_returns.mean() * TRADING_DAYS_PER_YEAR,
             "benchmark_return": self.benchmark_returns.mean() * TRADING_DAYS_PER_YEAR,
-            "portfolio_volatility": self.portfolio_returns.std() * np.sqrt(TRADING_DAYS_PER_YEAR),
-            "benchmark_volatility": self.benchmark_returns.std() * np.sqrt(TRADING_DAYS_PER_YEAR),
+            "portfolio_volatility": self.portfolio_returns.std()
+            * np.sqrt(TRADING_DAYS_PER_YEAR),
+            "benchmark_volatility": self.benchmark_returns.std()
+            * np.sqrt(TRADING_DAYS_PER_YEAR),
         }
 
     def generate_report(self) -> None:

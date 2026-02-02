@@ -72,8 +72,9 @@ class BacktestMetrics:
         rolling_std = self.daily_returns.rolling(window=window).std()
 
         rolling_sharpe = (
-            rolling_mean * np.sqrt(TRADING_DAYS_PER_YEAR) /
-            (rolling_std * np.sqrt(TRADING_DAYS_PER_YEAR))
+            rolling_mean
+            * np.sqrt(TRADING_DAYS_PER_YEAR)
+            / (rolling_std * np.sqrt(TRADING_DAYS_PER_YEAR))
         )
 
         return rolling_sharpe
@@ -142,24 +143,28 @@ class BacktestMetrics:
             elif dd < 0 and in_drawdown:
                 max_depth = min(max_depth, dd)
             elif dd == 0 and in_drawdown:
-                periods.append({
-                    "start": start_date,
-                    "end": date,
-                    "max_drawdown": max_depth,
-                    "duration_days": (date - start_date).days,
-                })
+                periods.append(
+                    {
+                        "start": start_date,
+                        "end": date,
+                        "max_drawdown": max_depth,
+                        "duration_days": (date - start_date).days,
+                    }
+                )
                 in_drawdown = False
                 max_depth = 0
 
         # Handle case where we end in drawdown
         if in_drawdown:
-            periods.append({
-                "start": start_date,
-                "end": drawdown.index[-1],
-                "max_drawdown": max_depth,
-                "duration_days": (drawdown.index[-1] - start_date).days,
-                "recovery": False,
-            })
+            periods.append(
+                {
+                    "start": start_date,
+                    "end": drawdown.index[-1],
+                    "max_drawdown": max_depth,
+                    "duration_days": (drawdown.index[-1] - start_date).days,
+                    "recovery": False,
+                }
+            )
 
         return periods
 
@@ -212,7 +217,9 @@ class BacktestMetrics:
         return {
             "total_trades": len(self.trades),
             "unique_dates": len(trade_dates),
-            "avg_trades_per_rebalance": len(self.trades) / len(trade_dates) if trade_dates else 0,
+            "avg_trades_per_rebalance": (
+                len(self.trades) / len(trade_dates) if trade_dates else 0
+            ),
             "total_costs": total_costs,
             "avg_trade_size": total_value / len(self.trades) if self.trades else 0,
         }
@@ -245,7 +252,9 @@ class BacktestMetrics:
             "worst_month": worst_month,
             "positive_months": positive_months,
             "total_months": total_months,
-            "monthly_win_rate": positive_months / total_months if total_months > 0 else 0,
+            "monthly_win_rate": (
+                positive_months / total_months if total_months > 0 else 0
+            ),
             "best_day": best_day,
             "worst_day": worst_day,
             "positive_days": positive_days,
@@ -296,23 +305,23 @@ class BacktestMetrics:
         metrics = {}
 
         # Basic performance
-        total_return = (
-            self.portfolio_value.iloc[-1] / self.portfolio_value.iloc[0] - 1
-        )
+        total_return = self.portfolio_value.iloc[-1] / self.portfolio_value.iloc[0] - 1
         years = (
             self.portfolio_value.index[-1] - self.portfolio_value.index[0]
         ).days / 365.25
 
         metrics["total_return"] = total_return
         metrics["cagr"] = (1 + total_return) ** (1 / years) - 1 if years > 0 else 0
-        metrics["annual_volatility"] = (
-            self.daily_returns.std() * np.sqrt(TRADING_DAYS_PER_YEAR)
+        metrics["annual_volatility"] = self.daily_returns.std() * np.sqrt(
+            TRADING_DAYS_PER_YEAR
         )
 
         # Drawdown
         drawdown = self.calculate_drawdown_series()
         metrics["max_drawdown"] = drawdown.min()
-        metrics["avg_drawdown"] = drawdown[drawdown < 0].mean() if (drawdown < 0).any() else 0
+        metrics["avg_drawdown"] = (
+            drawdown[drawdown < 0].mean() if (drawdown < 0).any() else 0
+        )
 
         # Add trade statistics
         metrics.update(self.calculate_trade_statistics())

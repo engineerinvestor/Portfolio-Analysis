@@ -43,7 +43,9 @@ class PortfolioOptimizer:
 
     TRADING_DAYS = TRADING_DAYS_PER_YEAR
 
-    def __init__(self, data: pd.DataFrame, risk_free_rate: float = DEFAULT_RISK_FREE_RATE):
+    def __init__(
+        self, data: pd.DataFrame, risk_free_rate: float = DEFAULT_RISK_FREE_RATE
+    ):
         self.data = data
         self.risk_free_rate = risk_free_rate
         self.n_assets = len(data.columns)
@@ -273,9 +275,7 @@ class PortfolioOptimizer:
             except (ValueError, RuntimeError) as e:
                 # Optimization may fail for extreme target returns
                 failed_count += 1
-                logger.debug(
-                    f"Optimization failed for target return {target:.4f}: {e}"
-                )
+                logger.debug(f"Optimization failed for target return {target:.4f}: {e}")
                 continue
 
         if failed_count > 0:

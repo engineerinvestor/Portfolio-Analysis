@@ -76,8 +76,7 @@ class BacktestVisualization:
         if benchmark is not None:
             # Normalize to same starting value
             normalized_benchmark = (
-                benchmark / benchmark.iloc[0] *
-                self.result.portfolio_value.iloc[0]
+                benchmark / benchmark.iloc[0] * self.result.portfolio_value.iloc[0]
             )
             ax.plot(
                 normalized_benchmark.index,
@@ -97,7 +96,9 @@ class BacktestVisualization:
         )
         props = dict(boxstyle="round", facecolor="wheat", alpha=0.8)
         ax.text(
-            0.02, 0.98, textstr,
+            0.02,
+            0.98,
+            textstr,
             transform=ax.transAxes,
             fontsize=10,
             verticalalignment="top",
@@ -158,9 +159,12 @@ class BacktestVisualization:
         max_dd_idx = drawdown.idxmin()
         max_dd = drawdown.min()
         ax.scatter(
-            [max_dd_idx], [max_dd * 100],
-            color="black", s=100, zorder=5,
-            label=f"Max DD: {max_dd:.1%}"
+            [max_dd_idx],
+            [max_dd * 100],
+            color="black",
+            s=100,
+            zorder=5,
+            label=f"Max DD: {max_dd:.1%}",
         )
 
         ax.set_title(f"Drawdown: {self.result.strategy_name}")
@@ -213,8 +217,11 @@ class BacktestVisualization:
         # Add average line
         avg_sharpe = rolling_sharpe.mean()
         ax.axhline(
-            y=avg_sharpe, color="green", linestyle="--", linewidth=1,
-            label=f"Average: {avg_sharpe:.2f}"
+            y=avg_sharpe,
+            color="green",
+            linestyle="--",
+            linewidth=1,
+            label=f"Average: {avg_sharpe:.2f}",
         )
 
         ax.set_title(f"Rolling {window}-Day Sharpe Ratio: {self.result.strategy_name}")
@@ -254,9 +261,9 @@ class BacktestVisualization:
         monthly = self.metrics.calculate_monthly_returns()
 
         # Create month-year matrix
-        returns_by_month = monthly.groupby(
-            [monthly.index.year, monthly.index.month]
-        ).first().unstack()
+        returns_by_month = (
+            monthly.groupby([monthly.index.year, monthly.index.month]).first().unstack()
+        )
 
         # Plot heatmap
         im = ax.imshow(
@@ -269,10 +276,22 @@ class BacktestVisualization:
 
         # Labels
         ax.set_xticks(range(12))
-        ax.set_xticklabels([
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ])
+        ax.set_xticklabels(
+            [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+            ]
+        )
         ax.set_yticks(range(len(returns_by_month.index)))
         ax.set_yticklabels(returns_by_month.index)
 
@@ -287,8 +306,11 @@ class BacktestVisualization:
                     val = returns_by_month.iloc[i, j]
                     if not np.isnan(val):
                         ax.text(
-                            j, i, f"{val*100:.1f}",
-                            ha="center", va="center",
+                            j,
+                            i,
+                            f"{val*100:.1f}",
+                            ha="center",
+                            va="center",
                             color="white" if abs(val) > 0.05 else "black",
                             fontsize=8,
                         )
@@ -379,8 +401,16 @@ class BacktestVisualization:
             linewidth=2,
         )
         if benchmark is not None:
-            normalized = benchmark / benchmark.iloc[0] * self.result.portfolio_value.iloc[0]
-            ax1.plot(normalized.index, normalized.values, label="Benchmark", linewidth=2, linestyle="--")
+            normalized = (
+                benchmark / benchmark.iloc[0] * self.result.portfolio_value.iloc[0]
+            )
+            ax1.plot(
+                normalized.index,
+                normalized.values,
+                label="Benchmark",
+                linewidth=2,
+                linestyle="--",
+            )
         ax1.set_title("Equity Curve")
         ax1.set_ylabel("Portfolio Value ($)")
         ax1.legend()
@@ -389,7 +419,9 @@ class BacktestVisualization:
         # Drawdown (middle left)
         ax2 = fig.add_subplot(3, 2, 3)
         drawdown = self.metrics.calculate_drawdown_series()
-        ax2.fill_between(drawdown.index, drawdown.values * 100, 0, alpha=0.5, color="red")
+        ax2.fill_between(
+            drawdown.index, drawdown.values * 100, 0, alpha=0.5, color="red"
+        )
         ax2.set_title("Drawdown")
         ax2.set_ylabel("Drawdown (%)")
         ax2.grid(True, alpha=0.3)
@@ -424,7 +456,11 @@ class BacktestVisualization:
         ax5.legend(loc="upper left", fontsize=8)
         ax5.set_ylim(0, 100)
 
-        fig.suptitle(f"Backtest Summary: {self.result.strategy_name}", fontsize=14, fontweight="bold")
+        fig.suptitle(
+            f"Backtest Summary: {self.result.strategy_name}",
+            fontsize=14,
+            fontweight="bold",
+        )
         fig.tight_layout()
 
         if show:

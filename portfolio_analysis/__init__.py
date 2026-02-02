@@ -9,13 +9,17 @@ __version__ = "0.2.1"
 __author__ = "Engineer Investor"
 
 # Constants and exceptions
+# Core classes - easy imports
+from portfolio_analysis.analysis.montecarlo import MonteCarloSimulation
+from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
 from portfolio_analysis.constants import (
+    DAYS_PER_YEAR,
     DEFAULT_BENCHMARK,
     DEFAULT_CONFIDENCE_LEVEL,
     DEFAULT_RISK_FREE_RATE,
-    DAYS_PER_YEAR,
     TRADING_DAYS_PER_YEAR,
 )
+from portfolio_analysis.data.loader import DataLoader
 from portfolio_analysis.exceptions import (
     ConfigurationError,
     DataError,
@@ -23,11 +27,6 @@ from portfolio_analysis.exceptions import (
     PortfolioAnalysisError,
     ValidationError,
 )
-
-# Core classes - easy imports
-from portfolio_analysis.analysis.montecarlo import MonteCarloSimulation
-from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
-from portfolio_analysis.data.loader import DataLoader
 from portfolio_analysis.metrics.benchmark import BenchmarkComparison
 from portfolio_analysis.metrics.performance import PerformanceMetrics
 from portfolio_analysis.visualization.plots import PortfolioVisualization

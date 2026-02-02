@@ -197,15 +197,11 @@ class RebalanceStrategy(Strategy):
         drift_threshold: Optional[float] = None,
         name: Optional[str] = None,
     ):
-        super().__init__(
-            initial_weights, name or f"Rebalance ({rebalance_frequency})"
-        )
+        super().__init__(initial_weights, name or f"Rebalance ({rebalance_frequency})")
         self.rebalance_frequency = rebalance_frequency
         self.drift_threshold = drift_threshold
         self._last_rebalance_date: Optional[pd.Timestamp] = None
-        self._days_between_rebalance = self.FREQUENCY_MAP.get(
-            rebalance_frequency, 63
-        )
+        self._days_between_rebalance = self.FREQUENCY_MAP.get(rebalance_frequency, 63)
 
     def generate_weights(
         self,
@@ -291,16 +287,12 @@ class MomentumStrategy(Strategy):
         rebalance_frequency: str = "M",
         name: Optional[str] = None,
     ):
-        super().__init__(
-            initial_weights, name or f"Momentum ({lookback_period}d)"
-        )
+        super().__init__(initial_weights, name or f"Momentum ({lookback_period}d)")
         self.lookback_period = lookback_period
         self.momentum_tilt = momentum_tilt
         self.rebalance_frequency = rebalance_frequency
         self._last_rebalance_date: Optional[pd.Timestamp] = None
-        self._days_between_rebalance = self.FREQUENCY_MAP.get(
-            rebalance_frequency, 21
-        )
+        self._days_between_rebalance = self.FREQUENCY_MAP.get(rebalance_frequency, 21)
 
     def generate_weights(
         self,
@@ -319,7 +311,7 @@ class MomentumStrategy(Strategy):
             return self.initial_weights.copy()
 
         # Calculate momentum (recent returns)
-        recent_data = available_data.iloc[-self.lookback_period:]
+        recent_data = available_data.iloc[-self.lookback_period :]
         momentum = recent_data.iloc[-1] / recent_data.iloc[0] - 1
 
         # Only consider tickers in our universe
@@ -337,9 +329,8 @@ class MomentumStrategy(Strategy):
             # Blend with base weights
             base_weights = pd.Series(self.initial_weights)
             final_weights = (
-                (1 - self.momentum_tilt) * base_weights
-                + self.momentum_tilt * mom_weights
-            )
+                1 - self.momentum_tilt
+            ) * base_weights + self.momentum_tilt * mom_weights
         else:
             final_weights = pd.Series(self.initial_weights)
 

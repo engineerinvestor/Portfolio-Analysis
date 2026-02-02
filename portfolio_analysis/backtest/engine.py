@@ -6,7 +6,6 @@ backtests with realistic transaction costs and generates comprehensive results.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -99,9 +98,7 @@ class BacktestEngine:
         # Validate that all strategy tickers are in data
         missing_tickers = set(strategy.initial_weights.keys()) - set(data.columns)
         if missing_tickers:
-            raise ValueError(
-                f"Strategy tickers not found in data: {missing_tickers}"
-            )
+            raise ValueError(f"Strategy tickers not found in data: {missing_tickers}")
 
     def run(self) -> BacktestResult:
         """
@@ -150,14 +147,16 @@ class BacktestEngine:
                     old_w = current_weights.get(ticker, 0)
                     new_w = target_weights.get(ticker, 0)
                     if abs(new_w - old_w) > 1e-6:
-                        trades.append({
-                            "date": date,
-                            "ticker": ticker,
-                            "old_weight": old_w,
-                            "new_weight": new_w,
-                            "trade_value": (new_w - old_w) * current_value,
-                            "cost": trade_cost,
-                        })
+                        trades.append(
+                            {
+                                "date": date,
+                                "ticker": ticker,
+                                "old_weight": old_w,
+                                "new_weight": new_w,
+                                "trade_value": (new_w - old_w) * current_value,
+                                "cost": trade_cost,
+                            }
+                        )
 
                 current_weights = target_weights.copy()
 
@@ -167,7 +166,7 @@ class BacktestEngine:
                     current_weights.get(ticker, 0) * returns.loc[date, ticker]
                     for ticker in tickers
                 )
-                current_value *= (1 + daily_return)
+                current_value *= 1 + daily_return
 
                 # Update weights based on price changes (weights drift)
                 total_value = sum(
@@ -186,7 +185,9 @@ class BacktestEngine:
             weights_history.append(current_weights.copy())
 
         # Create result series and DataFrame
-        portfolio_series = pd.Series(portfolio_values, index=dates, name="portfolio_value")
+        portfolio_series = pd.Series(
+            portfolio_values, index=dates, name="portfolio_value"
+        )
         daily_returns = portfolio_series.pct_change().fillna(0)
         weights_df = pd.DataFrame(weights_history, index=dates)
 
@@ -209,10 +210,13 @@ class BacktestEngine:
         portfolio_value: float,
     ) -> float:
         """Calculate total transaction cost for rebalancing."""
-        turnover = sum(
-            abs(target_weights.get(ticker, 0) - current_weights.get(ticker, 0))
-            for ticker in set(current_weights) | set(target_weights)
-        ) / 2  # Divide by 2 because we count each trade once
+        turnover = (
+            sum(
+                abs(target_weights.get(ticker, 0) - current_weights.get(ticker, 0))
+                for ticker in set(current_weights) | set(target_weights)
+            )
+            / 2
+        )  # Divide by 2 because we count each trade once
 
         trade_value = turnover * portfolio_value
         cost = trade_value * (self.transaction_cost + self.slippage)
@@ -236,14 +240,17 @@ class BacktestEngine:
 
         # Sharpe ratio (assuming 2% risk-free rate)
         risk_free_rate = 0.02
-        sharpe = (cagr - risk_free_rate) / annual_volatility if annual_volatility > 0 else 0
+        sharpe = (
+            (cagr - risk_free_rate) / annual_volatility if annual_volatility > 0 else 0
+        )
 
         # Sortino ratio
         downside_returns = daily_returns.where(daily_returns < 0, 0)
         downside_deviation = downside_returns.std() * np.sqrt(TRADING_DAYS_PER_YEAR)
         sortino = (
             (cagr - risk_free_rate) / downside_deviation
-            if downside_deviation > 0 else 0
+            if downside_deviation > 0
+            else 0
         )
 
         # Drawdown
