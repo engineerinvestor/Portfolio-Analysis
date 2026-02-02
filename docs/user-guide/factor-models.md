@@ -6,15 +6,17 @@ Understanding what drives your portfolio returns is crucial for informed investi
 
 Factor models explain asset returns as a linear combination of common risk factors plus an idiosyncratic component:
 
-$$R_i - R_f = \alpha_i + \beta_1 F_1 + \beta_2 F_2 + ... + \epsilon_i$$
+\[
+R_i - R_f = \alpha_i + \beta_1 F_1 + \beta_2 F_2 + ... + \epsilon_i
+\]
 
 Where:
 
-- $R_i - R_f$ = Excess return of asset $i$
-- $\alpha_i$ = Alpha (unexplained return, often attributed to skill)
-- $\beta_k$ = Sensitivity to factor $k$
-- $F_k$ = Factor return
-- $\epsilon_i$ = Idiosyncratic (asset-specific) return
+- \(R_i - R_f\) = Excess return of asset \(i\)
+- \(\alpha_i\) = Alpha (unexplained return, often attributed to skill)
+- \(\beta_k\) = Sensitivity to factor \(k\)
+- \(F_k\) = Factor return
+- \(\epsilon_i\) = Idiosyncratic (asset-specific) return
 
 ## Available Models
 
