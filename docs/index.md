@@ -129,9 +129,8 @@ print(results.summary())
 
 | Feature | QuantStats | PyPortfolioOpt | Riskfolio | **Portfolio Analysis** |
 |---------|:----------:|:--------------:|:---------:|:----------------------:|
-| Factor Models | ❌ | ❌ | ❌ | ✅ |
-| Return Attribution | ❌ | ❌ | ❌ | ✅ |
-| Tear Sheets | ✅ | ❌ | ❌ | ✅ |
+| Return factor regressions (CAPM/FF/Carhart) + attribution | ❌ | ❌ | ❌ | ✅ |
+| HTML Tear Sheets | ✅ | ❌ | ❌ | ✅ |
 | Optimization | ❌ | ✅ | ✅ | ✅ |
 | Interactive Widgets | ❌ | ❌ | ❌ | ✅ |
 | Streamlit App | ❌ | ❌ | ❌ | ✅ |
