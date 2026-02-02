@@ -2,15 +2,14 @@
 Benchmark comparison section for portfolio tear sheet.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from jinja2 import Template
 
 from portfolio_analysis.metrics.benchmark import BenchmarkComparison
-from portfolio_analysis.reporting.chart_utils import fig_to_base64, create_figure
+from portfolio_analysis.reporting.chart_utils import create_figure, fig_to_base64
 from portfolio_analysis.reporting.sections.base import ReportSection
 
 
@@ -118,7 +117,7 @@ class BenchmarkSection(ReportSection):
         fig.tight_layout()
         return fig_to_base64(fig)
 
-    def compute_data(self) -> Dict[str, Any]:
+    def compute_data(self) -> dict[str, Any]:
         """Compute benchmark comparison section data."""
         metrics = self.benchmark.get_metrics()
 

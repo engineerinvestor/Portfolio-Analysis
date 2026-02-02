@@ -3,7 +3,7 @@ Base class for report sections.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any
 
 from jinja2 import Template
 
@@ -27,7 +27,7 @@ class ReportSection(ABC):
         self.template = template
 
     @abstractmethod
-    def compute_data(self) -> Dict[str, Any]:
+    def compute_data(self) -> dict[str, Any]:
         """
         Compute the data needed for this section.
 

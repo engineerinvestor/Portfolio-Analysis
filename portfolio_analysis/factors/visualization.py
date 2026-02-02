@@ -2,10 +2,11 @@
 Factor analysis visualization functionality.
 """
 
+from typing import Optional
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from typing import Dict, List, Optional, Union
 
 from portfolio_analysis.factors.models import RegressionResults
 
@@ -94,7 +95,7 @@ class FactorVisualization:
     def plot_rolling_betas(
         rolling_data: pd.DataFrame,
         figsize: tuple = (12, 8),
-        factors: Optional[List[str]] = None,
+        factors: Optional[list[str]] = None,
     ) -> None:
         """
         Plot rolling factor betas over time.
@@ -152,7 +153,7 @@ class FactorVisualization:
 
     @staticmethod
     def plot_return_attribution(
-        attribution: Dict[str, float], figsize: tuple = (10, 6)
+        attribution: dict[str, float], figsize: tuple = (10, 6)
     ) -> None:
         """
         Plot return attribution as a waterfall chart.
@@ -196,7 +197,7 @@ class FactorVisualization:
         colors = ["green" if v >= 0 else "red" for v in values]
 
         # Create waterfall bars
-        bars = plt.bar(
+        _bars = plt.bar(  # noqa: F841
             components,
             values,
             bottom=cumulative,
@@ -242,7 +243,7 @@ class FactorVisualization:
         plt.show()
 
     @staticmethod
-    def plot_factor_tilts(tilts: Dict[str, float], figsize: tuple = (8, 8)) -> None:
+    def plot_factor_tilts(tilts: dict[str, float], figsize: tuple = (8, 8)) -> None:
         """
         Plot characteristic-based factor tilts as a radar chart.
 
@@ -433,7 +434,7 @@ class FactorVisualization:
 
     @staticmethod
     def plot_risk_attribution(
-        risk_decomp: Dict[str, float], figsize: tuple = (10, 6)
+        risk_decomp: dict[str, float], figsize: tuple = (10, 6)
     ) -> None:
         """
         Plot risk (variance) attribution as a stacked bar or pie chart.
@@ -448,7 +449,6 @@ class FactorVisualization:
         # Extract components (exclude 'total' and 'r_squared')
         components = [k for k in risk_decomp.keys() if k not in ["total", "r_squared"]]
         values = [risk_decomp[k] for k in components]
-        total = risk_decomp["total"]
 
         # Convert to percentages (use absolute values for pie chart)
         abs_values = [abs(v) for v in values]

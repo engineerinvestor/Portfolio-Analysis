@@ -2,11 +2,10 @@
 Benchmark comparison functionality.
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yfinance as yf
-import matplotlib.pyplot as plt
-from typing import List, Optional, Union
 
 
 class BenchmarkComparison:
@@ -48,7 +47,7 @@ class BenchmarkComparison:
     def __init__(
         self,
         portfolio_data: pd.DataFrame,
-        weights: List[float],
+        weights: list[float],
         benchmark_ticker: str = "SPY",
         risk_free_rate: float = 0.02,
     ):

@@ -2,10 +2,9 @@
 Portfolio visualization functionality.
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List, Optional
 
 
 class PortfolioVisualization:
@@ -43,7 +42,7 @@ class PortfolioVisualization:
 
     @staticmethod
     def plot_portfolio_return(
-        data: pd.DataFrame, weights: List[float], figsize: tuple = (10, 6)
+        data: pd.DataFrame, weights: list[float], figsize: tuple = (10, 6)
     ) -> None:
         """
         Plot cumulative portfolio return.
@@ -72,7 +71,7 @@ class PortfolioVisualization:
 
     @staticmethod
     def plot_allocation_pie(
-        weights: List[float], tickers: List[str], figsize: tuple = (8, 8)
+        weights: list[float], tickers: list[str], figsize: tuple = (8, 8)
     ) -> None:
         """
         Plot portfolio allocation as a pie chart.
@@ -105,7 +104,7 @@ class PortfolioVisualization:
 
     @staticmethod
     def plot_drawdown(
-        data: pd.DataFrame, weights: List[float], figsize: tuple = (12, 6)
+        data: pd.DataFrame, weights: list[float], figsize: tuple = (12, 6)
     ) -> None:
         """
         Plot portfolio drawdown over time.
@@ -140,7 +139,7 @@ class PortfolioVisualization:
     @staticmethod
     def plot_rolling_volatility(
         data: pd.DataFrame,
-        weights: List[float],
+        weights: list[float],
         window: int = 21,
         figsize: tuple = (12, 6),
     ) -> None:
@@ -176,7 +175,7 @@ class PortfolioVisualization:
     @staticmethod
     def plot_returns_distribution(
         data: pd.DataFrame,
-        weights: List[float],
+        weights: list[float],
         bins: int = 50,
         figsize: tuple = (10, 6),
     ) -> None:

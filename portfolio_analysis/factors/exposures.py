@@ -2,9 +2,10 @@
 Characteristic-based factor exposures for portfolio analysis.
 """
 
+from typing import Optional
+
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional, Union
 import yfinance as yf
 
 
@@ -34,7 +35,7 @@ class FactorExposures:
     LARGE_CAP_THRESHOLD = 10.0
     SMALL_CAP_THRESHOLD = 2.0
 
-    def __init__(self, tickers: List[str], weights: List[float]):
+    def __init__(self, tickers: list[str], weights: list[float]):
         if len(tickers) != len(weights):
             raise ValueError("Number of tickers must match number of weights")
 
@@ -318,7 +319,7 @@ class FactorExposures:
 
         return float(np.dot(scores, self.weights))
 
-    def get_all_tilts(self) -> Dict[str, float]:
+    def get_all_tilts(self) -> dict[str, float]:
         """
         Calculate all factor tilts for the portfolio.
 

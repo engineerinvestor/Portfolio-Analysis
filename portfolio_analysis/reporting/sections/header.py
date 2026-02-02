@@ -2,14 +2,11 @@
 Header section for portfolio tear sheet.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-import numpy as np
-import pandas as pd
 from jinja2 import Template
 
 from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
-from portfolio_analysis.metrics.performance import PerformanceMetrics
 from portfolio_analysis.reporting.sections.base import ReportSection
 
 
@@ -34,14 +31,14 @@ class HeaderSection(ReportSection):
         portfolio: PortfolioAnalysis,
         template: Template,
         title: Optional[str] = None,
-        tickers: Optional[List[str]] = None,
+        tickers: Optional[list[str]] = None,
     ):
         super().__init__(template)
         self.portfolio = portfolio
         self.title = title or "Portfolio Analysis"
         self.tickers = tickers or list(portfolio.data.columns)
 
-    def compute_data(self) -> Dict[str, Any]:
+    def compute_data(self) -> dict[str, Any]:
         """Compute header section data."""
         summary = self.portfolio.get_summary()
         cumulative = self.portfolio.calculate_cumulative_returns()

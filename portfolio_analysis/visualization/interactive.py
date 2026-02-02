@@ -2,23 +2,23 @@
 Interactive widget-based portfolio analyzer for Jupyter/Colab.
 """
 
+from datetime import datetime, timedelta
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
 
 try:
     import ipywidgets as widgets
-    from IPython.display import display, clear_output
+    from IPython.display import clear_output, display
 
     HAS_WIDGETS = True
 except ImportError:
     HAS_WIDGETS = False
 
-from portfolio_analysis.data.loader import DataLoader
-from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
 from portfolio_analysis.analysis.montecarlo import MonteCarloSimulation
-
+from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
+from portfolio_analysis.data.loader import DataLoader
 
 # Preset portfolios for quick selection
 PRESET_PORTFOLIOS = {

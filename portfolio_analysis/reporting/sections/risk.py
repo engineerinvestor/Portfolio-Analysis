@@ -2,7 +2,7 @@
 Risk metrics section for portfolio tear sheet.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,6 @@ from jinja2 import Template
 from scipy import stats
 
 from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
-from portfolio_analysis.metrics.performance import PerformanceMetrics
 from portfolio_analysis.reporting.sections.base import ReportSection
 
 
@@ -49,7 +48,7 @@ class RiskSection(ReportSection):
         var = self._calculate_var(returns, confidence)
         return returns[returns <= var].mean()
 
-    def compute_data(self) -> Dict[str, Any]:
+    def compute_data(self) -> dict[str, Any]:
         """Compute risk metrics section data."""
         returns = self.portfolio.calculate_portfolio_returns()
         cumulative = self.portfolio.calculate_cumulative_returns()

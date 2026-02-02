@@ -9,11 +9,11 @@ __version__ = "0.1.0"
 __author__ = "Engineer Investor"
 
 # Core classes - easy imports
-from portfolio_analysis.data.loader import DataLoader
-from portfolio_analysis.metrics.performance import PerformanceMetrics
-from portfolio_analysis.metrics.benchmark import BenchmarkComparison
-from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
 from portfolio_analysis.analysis.montecarlo import MonteCarloSimulation
+from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
+from portfolio_analysis.data.loader import DataLoader
+from portfolio_analysis.metrics.benchmark import BenchmarkComparison
+from portfolio_analysis.metrics.performance import PerformanceMetrics
 from portfolio_analysis.visualization.plots import PortfolioVisualization
 
 # Optional: optimization (requires scipy)
@@ -39,14 +39,14 @@ except ImportError:
 # Optional: Factor analysis (requires pandas-datareader)
 try:
     from portfolio_analysis.factors import (
-        FactorDataLoader,
-        FactorModel,
-        RegressionResults,
-        FactorRegression,
-        FactorExposures,
         FactorAttribution,
+        FactorDataLoader,
+        FactorExposures,
+        FactorModel,
         FactorOptimizer,
+        FactorRegression,
         FactorVisualization,
+        RegressionResults,
     )
 except ImportError:
     FactorDataLoader = None

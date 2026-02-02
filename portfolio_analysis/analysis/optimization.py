@@ -2,10 +2,9 @@
 Portfolio optimization functionality.
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List, Dict, Optional, Tuple
 from scipy.optimize import minimize
 
 
@@ -62,7 +61,7 @@ class PortfolioOptimizer:
         """Negative Sharpe for minimization."""
         return -self._portfolio_sharpe(weights)
 
-    def optimize_max_sharpe(self, weight_bounds: Tuple[float, float] = (0, 1)) -> Dict:
+    def optimize_max_sharpe(self, weight_bounds: tuple[float, float] = (0, 1)) -> dict:
         """
         Find the portfolio with maximum Sharpe ratio.
 
@@ -97,8 +96,8 @@ class PortfolioOptimizer:
         }
 
     def optimize_min_volatility(
-        self, weight_bounds: Tuple[float, float] = (0, 1)
-    ) -> Dict:
+        self, weight_bounds: tuple[float, float] = (0, 1)
+    ) -> dict:
         """
         Find the minimum volatility portfolio.
 
@@ -133,8 +132,8 @@ class PortfolioOptimizer:
         }
 
     def optimize_target_return(
-        self, target_return: float, weight_bounds: Tuple[float, float] = (0, 1)
-    ) -> Dict:
+        self, target_return: float, weight_bounds: tuple[float, float] = (0, 1)
+    ) -> dict:
         """
         Find minimum volatility portfolio for a target return.
 
@@ -173,7 +172,7 @@ class PortfolioOptimizer:
             "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
         }
 
-    def optimize_risk_parity(self) -> Dict:
+    def optimize_risk_parity(self) -> dict:
         """
         Find the risk parity portfolio (equal risk contribution).
 
@@ -222,7 +221,7 @@ class PortfolioOptimizer:
         }
 
     def generate_efficient_frontier(
-        self, n_points: int = 50, weight_bounds: Tuple[float, float] = (0, 1)
+        self, n_points: int = 50, weight_bounds: tuple[float, float] = (0, 1)
     ) -> pd.DataFrame:
         """
         Generate points on the efficient frontier.
@@ -241,7 +240,7 @@ class PortfolioOptimizer:
         """
         # Find return range
         min_vol = self.optimize_min_volatility(weight_bounds)
-        max_sharpe = self.optimize_max_sharpe(weight_bounds)
+        _max_sharpe = self.optimize_max_sharpe(weight_bounds)  # noqa: F841
 
         min_ret = min_vol["return"]
         max_ret = max(self.mean_returns)
@@ -259,7 +258,7 @@ class PortfolioOptimizer:
                         "sharpe_ratio": portfolio["sharpe_ratio"],
                     }
                 )
-            except:
+            except Exception:
                 continue
 
         return pd.DataFrame(frontier)
@@ -269,7 +268,7 @@ class PortfolioOptimizer:
         n_points: int = 50,
         show_assets: bool = True,
         show_optimal: bool = True,
-        weight_bounds: Tuple[float, float] = (0, 1),
+        weight_bounds: tuple[float, float] = (0, 1),
     ) -> None:
         """
         Plot the efficient frontier with optimal portfolios marked.
@@ -340,7 +339,7 @@ class PortfolioOptimizer:
         plt.tight_layout()
         plt.show()
 
-    def print_comparison(self, weight_bounds: Tuple[float, float] = (0, 1)) -> None:
+    def print_comparison(self, weight_bounds: tuple[float, float] = (0, 1)) -> None:
         """Print comparison of optimization strategies."""
         equal_weight = np.array([1 / self.n_assets] * self.n_assets)
         max_sharpe = self.optimize_max_sharpe(weight_bounds)

@@ -3,10 +3,9 @@ Utility functions for portfolio analysis.
 """
 
 import numpy as np
-from typing import List
 
 
-def validate_weights(weights: List[float], tolerance: float = 0.001) -> bool:
+def validate_weights(weights: list[float], tolerance: float = 0.001) -> bool:
     """
     Validate that portfolio weights sum to 1.0.
 
@@ -25,7 +24,7 @@ def validate_weights(weights: List[float], tolerance: float = 0.001) -> bool:
     return np.isclose(sum(weights), 1.0, atol=tolerance)
 
 
-def normalize_weights(weights: List[float]) -> np.ndarray:
+def normalize_weights(weights: list[float]) -> np.ndarray:
     """
     Normalize weights to sum to 1.0.
 

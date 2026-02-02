@@ -2,10 +2,11 @@
 Monte Carlo simulation for portfolio projections.
 """
 
+from typing import Optional
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List, Dict, Optional
 
 
 class MonteCarloSimulation:
@@ -39,7 +40,7 @@ class MonteCarloSimulation:
     def __init__(
         self,
         data: pd.DataFrame,
-        weights: List[float],
+        weights: list[float],
         num_simulations: int = 1000,
         time_horizon: int = 252,
         initial_investment: float = 10000,
@@ -90,7 +91,7 @@ class MonteCarloSimulation:
         self._results = results
         return results
 
-    def get_statistics(self, percentiles: List[int] = [5, 25, 50, 75, 95]) -> Dict:
+    def get_statistics(self, percentiles: list[int] = [5, 25, 50, 75, 95]) -> dict:
         """
         Calculate statistics across all simulation paths.
 
@@ -211,7 +212,7 @@ class MonteCarloSimulation:
 
         # Add summary statistics text box
         final_stats = stats["final_values"]
-        textstr = f"Final Value Statistics:\n"
+        textstr = "Final Value Statistics:\n"
         textstr += f"Median: ${final_stats['median']:,.0f}\n"
         textstr += f"5th %: ${final_stats['percentile_5']:,.0f}\n"
         textstr += f"95th %: ${final_stats['percentile_95']:,.0f}\n"

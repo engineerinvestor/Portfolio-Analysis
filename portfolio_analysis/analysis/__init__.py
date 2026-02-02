@@ -1,7 +1,7 @@
 """Portfolio analysis modules."""
 
-from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
 from portfolio_analysis.analysis.montecarlo import MonteCarloSimulation
+from portfolio_analysis.analysis.portfolio import PortfolioAnalysis
 
 # Optional optimization (requires scipy)
 try:

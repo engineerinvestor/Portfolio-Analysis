@@ -2,12 +2,12 @@
 Factor-aware portfolio optimization.
 """
 
+from typing import Union
+
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional, Tuple, Union
 from scipy.optimize import minimize
 
-from portfolio_analysis.factors.data import align_returns_with_factors
 from portfolio_analysis.factors.models import FactorModel
 
 
@@ -95,7 +95,7 @@ class FactorOptimizer:
 
         return pd.DataFrame(betas).T
 
-    def _portfolio_betas(self, weights: np.ndarray) -> Dict[str, float]:
+    def _portfolio_betas(self, weights: np.ndarray) -> dict[str, float]:
         """Calculate portfolio-level factor betas given weights."""
         portfolio_betas = {}
         for factor in self._asset_betas.columns:
@@ -118,10 +118,10 @@ class FactorOptimizer:
 
     def optimize_target_exposures(
         self,
-        target_betas: Dict[str, float],
-        weight_bounds: Tuple[float, float] = (0, 1),
+        target_betas: dict[str, float],
+        weight_bounds: tuple[float, float] = (0, 1),
         tolerance: float = 0.1,
-    ) -> Dict:
+    ) -> dict:
         """
         Optimize portfolio to achieve target factor exposures.
 
@@ -195,10 +195,10 @@ class FactorOptimizer:
 
     def optimize_factor_neutral(
         self,
-        factors: List[str],
-        weight_bounds: Tuple[float, float] = (0, 1),
+        factors: list[str],
+        weight_bounds: tuple[float, float] = (0, 1),
         tolerance: float = 0.05,
-    ) -> Dict:
+    ) -> dict:
         """
         Optimize portfolio to be neutral to specified factors.
 
@@ -263,8 +263,8 @@ class FactorOptimizer:
     def optimize_max_alpha(
         self,
         model: Union[str, FactorModel] = "ff3",
-        weight_bounds: Tuple[float, float] = (0, 1),
-    ) -> Dict:
+        weight_bounds: tuple[float, float] = (0, 1),
+    ) -> dict:
         """
         Optimize portfolio to maximize expected alpha.
 
@@ -339,7 +339,7 @@ class FactorOptimizer:
         self,
         factor: str,
         n_points: int = 20,
-        weight_bounds: Tuple[float, float] = (0, 1),
+        weight_bounds: tuple[float, float] = (0, 1),
     ) -> pd.DataFrame:
         """
         Generate efficient frontier varying one factor's exposure.

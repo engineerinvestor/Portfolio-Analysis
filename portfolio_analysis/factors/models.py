@@ -2,11 +2,12 @@
 Factor regression models for portfolio analysis.
 """
 
+from dataclasses import dataclass
+from enum import Enum
+from typing import Optional, Union
+
 import numpy as np
 import pandas as pd
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
-from enum import Enum
 
 from portfolio_analysis.factors.data import align_returns_with_factors
 
@@ -62,15 +63,15 @@ class RegressionResults:
 
     alpha: float
     alpha_pvalue: float
-    betas: Dict[str, float]
-    beta_pvalues: Dict[str, float]
-    beta_tstats: Dict[str, float]
+    betas: dict[str, float]
+    beta_pvalues: dict[str, float]
+    beta_tstats: dict[str, float]
     r_squared: float
     adj_r_squared: float
     residual_std: float
     n_observations: int
     model: str
-    factors: List[str]
+    factors: list[str]
 
     def summary(self) -> str:
         """Generate a text summary of regression results."""
@@ -166,7 +167,7 @@ class FactorRegression:
 
         self.annualization_factor = annualization_factor
 
-    def _get_model_factors(self, model: Union[str, FactorModel]) -> List[str]:
+    def _get_model_factors(self, model: Union[str, FactorModel]) -> list[str]:
         """Get factor names for a model."""
         if isinstance(model, str):
             model = model.lower()
