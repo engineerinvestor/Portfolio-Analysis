@@ -7,6 +7,13 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
+from portfolio_analysis.constants import (
+    DEFAULT_RISK_FREE_RATE,
+    TRADING_DAYS_PER_YEAR,
+    WEIGHT_SUM_TOLERANCE,
+)
+from portfolio_analysis.exceptions import ValidationError
+
 
 class BenchmarkComparison:
     """
@@ -49,16 +56,33 @@ class BenchmarkComparison:
         portfolio_data: pd.DataFrame,
         weights: list[float],
         benchmark_ticker: str = "SPY",
-        risk_free_rate: float = 0.02,
+        risk_free_rate: float = DEFAULT_RISK_FREE_RATE,
     ):
         self.portfolio_data = portfolio_data
         self.weights = np.array(weights)
         self.benchmark_ticker = benchmark_ticker
         self.risk_free_rate = risk_free_rate
 
+        # Validate weights
+        self._validate_weights()
+
         # Calculate portfolio returns
         returns = portfolio_data.pct_change().dropna()
         self.portfolio_returns = returns.dot(self.weights)
+
+    def _validate_weights(self) -> None:
+        """Validate that weights are valid for portfolio calculations."""
+        if len(self.weights) != len(self.portfolio_data.columns):
+            raise ValidationError(
+                f"Number of weights ({len(self.weights)}) must match "
+                f"number of assets ({len(self.portfolio_data.columns)})"
+            )
+
+        weight_sum = np.sum(self.weights)
+        if not np.isclose(weight_sum, 1.0, atol=WEIGHT_SUM_TOLERANCE):
+            raise ValidationError(
+                f"Weights must sum to 1.0, got {weight_sum:.6f}"
+            )
 
         # Fetch benchmark data
         self.benchmark_data = self._fetch_benchmark()
@@ -120,12 +144,12 @@ class BenchmarkComparison:
 
         portfolio_mean = self.portfolio_returns.mean()
         benchmark_mean = self.benchmark_returns.mean()
-        rf_daily = self.risk_free_rate / 252
+        rf_daily = self.risk_free_rate / TRADING_DAYS_PER_YEAR
 
         alpha = portfolio_mean - (rf_daily + beta * (benchmark_mean - rf_daily))
 
         if annualized:
-            alpha = alpha * 252
+            alpha = alpha * TRADING_DAYS_PER_YEAR
 
         return alpha
 
@@ -135,7 +159,7 @@ class BenchmarkComparison:
         tracking_error = active_returns.std()
 
         if annualized:
-            tracking_error = tracking_error * np.sqrt(252)
+            tracking_error = tracking_error * np.sqrt(TRADING_DAYS_PER_YEAR)
 
         return tracking_error
 
@@ -143,7 +167,7 @@ class BenchmarkComparison:
         """Calculate information ratio."""
         active_return = (
             self.portfolio_returns.mean() - self.benchmark_returns.mean()
-        ) * 252
+        ) * TRADING_DAYS_PER_YEAR
         tracking_error = self.calculate_tracking_error(annualized=True)
 
         if tracking_error == 0:
@@ -192,10 +216,10 @@ class BenchmarkComparison:
             "r_squared": self.calculate_r_squared(),
             "up_capture": self.calculate_up_capture(),
             "down_capture": self.calculate_down_capture(),
-            "portfolio_return": self.portfolio_returns.mean() * 252,
-            "benchmark_return": self.benchmark_returns.mean() * 252,
-            "portfolio_volatility": self.portfolio_returns.std() * np.sqrt(252),
-            "benchmark_volatility": self.benchmark_returns.std() * np.sqrt(252),
+            "portfolio_return": self.portfolio_returns.mean() * TRADING_DAYS_PER_YEAR,
+            "benchmark_return": self.benchmark_returns.mean() * TRADING_DAYS_PER_YEAR,
+            "portfolio_volatility": self.portfolio_returns.std() * np.sqrt(TRADING_DAYS_PER_YEAR),
+            "benchmark_volatility": self.benchmark_returns.std() * np.sqrt(TRADING_DAYS_PER_YEAR),
         }
 
     def generate_report(self) -> None:
@@ -240,21 +264,37 @@ class BenchmarkComparison:
         print(f"  Down Capture:      {metrics['down_capture']:.1f}%")
         print("=" * 60)
 
-    def plot_cumulative_returns(self, initial_value: float = 10000) -> None:
-        """Plot cumulative returns comparison."""
+    def plot_cumulative_returns(
+        self, initial_value: float = 10000, show: bool = True
+    ) -> plt.Figure:
+        """
+        Plot cumulative returns comparison.
+
+        Parameters
+        ----------
+        initial_value : float, default 10000
+            Starting portfolio value for visualization
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
+        """
         portfolio_cum = (1 + self.portfolio_returns).cumprod() * initial_value
         benchmark_cum = (1 + self.benchmark_returns).cumprod() * initial_value
 
-        plt.figure(figsize=(12, 6))
+        fig, ax = plt.subplots(figsize=(12, 6))
 
-        plt.plot(
+        ax.plot(
             portfolio_cum.index,
             portfolio_cum.values,
             label="Portfolio",
             linewidth=2,
             color="blue",
         )
-        plt.plot(
+        ax.plot(
             benchmark_cum.index,
             benchmark_cum.values,
             label=f"Benchmark ({self.benchmark_ticker})",
@@ -262,16 +302,36 @@ class BenchmarkComparison:
             color="orange",
         )
 
-        plt.title("Cumulative Returns: Portfolio vs Benchmark")
-        plt.xlabel("Date")
-        plt.ylabel(f"Value (starting from ${initial_value:,.0f})")
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.show()
+        ax.set_title("Cumulative Returns: Portfolio vs Benchmark")
+        ax.set_xlabel("Date")
+        ax.set_ylabel(f"Value (starting from ${initial_value:,.0f})")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
 
-    def plot_rolling_metrics(self, window: int = 252) -> None:
-        """Plot rolling alpha and beta."""
+        if show:
+            plt.show()
+
+        return fig
+
+    def plot_rolling_metrics(
+        self, window: int = TRADING_DAYS_PER_YEAR, show: bool = True
+    ) -> plt.Figure:
+        """
+        Plot rolling alpha and beta.
+
+        Parameters
+        ----------
+        window : int, default 252
+            Rolling window size in trading days
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
+        """
         fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
         rolling_beta = []
@@ -286,11 +346,11 @@ class BenchmarkComparison:
             var = np.var(bench_window)
             beta = cov / var
 
-            rf_daily = self.risk_free_rate / 252
+            rf_daily = self.risk_free_rate / TRADING_DAYS_PER_YEAR
             alpha = (
                 port_window.mean()
                 - (rf_daily + beta * (bench_window.mean() - rf_daily))
-            ) * 252
+            ) * TRADING_DAYS_PER_YEAR
 
             rolling_beta.append(beta)
             rolling_alpha.append(alpha)
@@ -316,5 +376,9 @@ class BenchmarkComparison:
         axes[1].legend()
         axes[1].grid(True, alpha=0.3)
 
-        plt.tight_layout()
-        plt.show()
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig

@@ -2,10 +2,21 @@
 Portfolio optimization functionality.
 """
 
+import logging
+import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
+
+from portfolio_analysis.constants import (
+    DEFAULT_RISK_FREE_RATE,
+    TRADING_DAYS_PER_YEAR,
+)
+from portfolio_analysis.exceptions import OptimizationError
+
+logger = logging.getLogger(__name__)
 
 
 class PortfolioOptimizer:
@@ -30,9 +41,9 @@ class PortfolioOptimizer:
     >>> optimizer.plot_efficient_frontier()
     """
 
-    TRADING_DAYS = 252
+    TRADING_DAYS = TRADING_DAYS_PER_YEAR
 
-    def __init__(self, data: pd.DataFrame, risk_free_rate: float = 0.02):
+    def __init__(self, data: pd.DataFrame, risk_free_rate: float = DEFAULT_RISK_FREE_RATE):
         self.data = data
         self.risk_free_rate = risk_free_rate
         self.n_assets = len(data.columns)
@@ -248,6 +259,7 @@ class PortfolioOptimizer:
         target_returns = np.linspace(min_ret, max_ret, n_points)
 
         frontier = []
+        failed_count = 0
         for target in target_returns:
             try:
                 portfolio = self.optimize_target_return(target, weight_bounds)
@@ -258,8 +270,26 @@ class PortfolioOptimizer:
                         "sharpe_ratio": portfolio["sharpe_ratio"],
                     }
                 )
-            except Exception:
+            except (ValueError, RuntimeError) as e:
+                # Optimization may fail for extreme target returns
+                failed_count += 1
+                logger.debug(
+                    f"Optimization failed for target return {target:.4f}: {e}"
+                )
                 continue
+
+        if failed_count > 0:
+            warnings.warn(
+                f"Optimization failed for {failed_count}/{n_points} target returns. "
+                "This is normal for extreme values at the frontier edges.",
+                stacklevel=2,
+            )
+
+        if len(frontier) == 0:
+            raise OptimizationError(
+                "Failed to generate any points on the efficient frontier. "
+                "Check that your data is valid and has sufficient history."
+            )
 
         return pd.DataFrame(frontier)
 
@@ -269,7 +299,8 @@ class PortfolioOptimizer:
         show_assets: bool = True,
         show_optimal: bool = True,
         weight_bounds: tuple[float, float] = (0, 1),
-    ) -> None:
+        show: bool = True,
+    ) -> plt.Figure:
         """
         Plot the efficient frontier with optimal portfolios marked.
 
@@ -283,13 +314,20 @@ class PortfolioOptimizer:
             Mark optimal portfolios (max Sharpe, min vol)
         weight_bounds : tuple, default (0, 1)
             Min and max weight for each asset
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
         """
         frontier = self.generate_efficient_frontier(n_points, weight_bounds)
 
-        plt.figure(figsize=(12, 8))
+        fig, ax = plt.subplots(figsize=(12, 8))
 
         # Plot efficient frontier
-        plt.plot(
+        ax.plot(
             frontier["volatility"] * 100,
             frontier["return"] * 100,
             "b-",
@@ -300,7 +338,7 @@ class PortfolioOptimizer:
         if show_assets:
             # Plot individual assets
             for i, ticker in enumerate(self.tickers):
-                plt.scatter(
+                ax.scatter(
                     np.sqrt(self.cov_matrix.iloc[i, i]) * 100,
                     self.mean_returns.iloc[i] * 100,
                     s=100,
@@ -311,7 +349,7 @@ class PortfolioOptimizer:
         if show_optimal:
             # Mark max Sharpe portfolio
             max_sharpe = self.optimize_max_sharpe(weight_bounds)
-            plt.scatter(
+            ax.scatter(
                 max_sharpe["volatility"] * 100,
                 max_sharpe["return"] * 100,
                 s=200,
@@ -322,7 +360,7 @@ class PortfolioOptimizer:
 
             # Mark min volatility portfolio
             min_vol = self.optimize_min_volatility(weight_bounds)
-            plt.scatter(
+            ax.scatter(
                 min_vol["volatility"] * 100,
                 min_vol["return"] * 100,
                 s=200,
@@ -331,13 +369,17 @@ class PortfolioOptimizer:
                 label="Min Volatility",
             )
 
-        plt.xlabel("Volatility (%)")
-        plt.ylabel("Expected Return (%)")
-        plt.title("Efficient Frontier")
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.show()
+        ax.set_xlabel("Volatility (%)")
+        ax.set_ylabel("Expected Return (%)")
+        ax.set_title("Efficient Frontier")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig
 
     def print_comparison(self, weight_bounds: tuple[float, float] = (0, 1)) -> None:
         """Print comparison of optimization strategies."""

@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from portfolio_analysis.constants import TRADING_DAYS_PER_YEAR
+
 
 class PortfolioVisualization:
     """
@@ -19,7 +21,9 @@ class PortfolioVisualization:
     """
 
     @staticmethod
-    def plot_performance(data: pd.DataFrame, figsize: tuple = (10, 6)) -> None:
+    def plot_performance(
+        data: pd.DataFrame, figsize: tuple = (10, 6), show: bool = True
+    ) -> plt.Figure:
         """
         Plot cumulative returns for all assets.
 
@@ -29,21 +33,36 @@ class PortfolioVisualization:
             Price data with datetime index
         figsize : tuple, default (10, 6)
             Figure size
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
         """
+        fig, ax = plt.subplots(figsize=figsize)
         cumulative_returns = (1 + data.pct_change()).cumprod()
-        cumulative_returns.plot(figsize=figsize)
-        plt.title("Cumulative Returns by Asset")
-        plt.xlabel("Date")
-        plt.ylabel("Cumulative Returns")
-        plt.grid(True, alpha=0.3)
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
+        cumulative_returns.plot(ax=ax)
+        ax.set_title("Cumulative Returns by Asset")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Cumulative Returns")
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig
 
     @staticmethod
     def plot_portfolio_return(
-        data: pd.DataFrame, weights: list[float], figsize: tuple = (10, 6)
-    ) -> None:
+        data: pd.DataFrame,
+        weights: list[float],
+        figsize: tuple = (10, 6),
+        show: bool = True,
+    ) -> plt.Figure:
         """
         Plot cumulative portfolio return.
 
@@ -55,24 +74,38 @@ class PortfolioVisualization:
             Portfolio weights
         figsize : tuple, default (10, 6)
             Figure size
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
         """
         returns = data.pct_change().dropna()
         weighted_returns = returns.dot(weights)
         cumulative_portfolio_returns = (1 + weighted_returns).cumprod()
 
-        plt.figure(figsize=figsize)
-        plt.plot(cumulative_portfolio_returns, linewidth=2, color="blue")
-        plt.title("Portfolio Cumulative Return")
-        plt.xlabel("Date")
-        plt.ylabel("Growth of $1")
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.show()
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.plot(cumulative_portfolio_returns, linewidth=2, color="blue")
+        ax.set_title("Portfolio Cumulative Return")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Growth of $1")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig
 
     @staticmethod
     def plot_allocation_pie(
-        weights: list[float], tickers: list[str], figsize: tuple = (8, 8)
-    ) -> None:
+        weights: list[float],
+        tickers: list[str],
+        figsize: tuple = (8, 8),
+        show: bool = True,
+    ) -> plt.Figure:
         """
         Plot portfolio allocation as a pie chart.
 
@@ -84,28 +117,42 @@ class PortfolioVisualization:
             Ticker symbols
         figsize : tuple, default (8, 8)
             Figure size
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
         """
         # Filter out zero weights
         non_zero = [(t, w) for t, w in zip(tickers, weights) if w > 0.001]
         labels, sizes = zip(*non_zero) if non_zero else ([], [])
 
-        plt.figure(figsize=figsize)
-        plt.pie(
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.pie(
             sizes,
             labels=labels,
             autopct="%1.1f%%",
             startangle=90,
             colors=plt.cm.Paired.colors,
         )
-        plt.title("Portfolio Allocation")
-        plt.axis("equal")
-        plt.tight_layout()
-        plt.show()
+        ax.set_title("Portfolio Allocation")
+        ax.axis("equal")
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig
 
     @staticmethod
     def plot_drawdown(
-        data: pd.DataFrame, weights: list[float], figsize: tuple = (12, 6)
-    ) -> None:
+        data: pd.DataFrame,
+        weights: list[float],
+        figsize: tuple = (12, 6),
+        show: bool = True,
+    ) -> plt.Figure:
         """
         Plot portfolio drawdown over time.
 
@@ -117,6 +164,13 @@ class PortfolioVisualization:
             Portfolio weights
         figsize : tuple, default (12, 6)
             Figure size
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
         """
         returns = data.pct_change().dropna()
         weighted_returns = returns.dot(weights)
@@ -124,17 +178,21 @@ class PortfolioVisualization:
         peak = cumulative.expanding(min_periods=1).max()
         drawdown = (cumulative / peak) - 1
 
-        plt.figure(figsize=figsize)
-        plt.fill_between(
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.fill_between(
             drawdown.index, drawdown.values * 100, 0, alpha=0.5, color="red"
         )
-        plt.plot(drawdown.index, drawdown.values * 100, color="darkred", linewidth=1)
-        plt.title("Portfolio Drawdown")
-        plt.xlabel("Date")
-        plt.ylabel("Drawdown (%)")
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.show()
+        ax.plot(drawdown.index, drawdown.values * 100, color="darkred", linewidth=1)
+        ax.set_title("Portfolio Drawdown")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Drawdown (%)")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig
 
     @staticmethod
     def plot_rolling_volatility(
@@ -142,7 +200,8 @@ class PortfolioVisualization:
         weights: list[float],
         window: int = 21,
         figsize: tuple = (12, 6),
-    ) -> None:
+        show: bool = True,
+    ) -> plt.Figure:
         """
         Plot rolling portfolio volatility.
 
@@ -156,21 +215,34 @@ class PortfolioVisualization:
             Rolling window in trading days
         figsize : tuple, default (12, 6)
             Figure size
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
         """
         returns = data.pct_change().dropna()
         weighted_returns = returns.dot(weights)
-        rolling_vol = weighted_returns.rolling(window=window).std() * np.sqrt(252)
+        rolling_vol = weighted_returns.rolling(window=window).std() * np.sqrt(
+            TRADING_DAYS_PER_YEAR
+        )
 
-        plt.figure(figsize=figsize)
-        plt.plot(
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.plot(
             rolling_vol.index, rolling_vol.values * 100, linewidth=1.5, color="blue"
         )
-        plt.title(f"{window}-Day Rolling Volatility (Annualized)")
-        plt.xlabel("Date")
-        plt.ylabel("Volatility (%)")
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.show()
+        ax.set_title(f"{window}-Day Rolling Volatility (Annualized)")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Volatility (%)")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig
 
     @staticmethod
     def plot_returns_distribution(
@@ -178,7 +250,8 @@ class PortfolioVisualization:
         weights: list[float],
         bins: int = 50,
         figsize: tuple = (10, 6),
-    ) -> None:
+        show: bool = True,
+    ) -> plt.Figure:
         """
         Plot histogram of portfolio returns.
 
@@ -192,24 +265,35 @@ class PortfolioVisualization:
             Number of histogram bins
         figsize : tuple, default (10, 6)
             Figure size
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+
+        Returns
+        -------
+        plt.Figure
+            The matplotlib figure object
         """
         returns = data.pct_change().dropna()
         weighted_returns = returns.dot(weights)
 
-        plt.figure(figsize=figsize)
-        plt.hist(weighted_returns * 100, bins=bins, edgecolor="black", alpha=0.7)
-        plt.axvline(x=0, color="red", linestyle="--", linewidth=1)
-        plt.axvline(
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.hist(weighted_returns * 100, bins=bins, edgecolor="black", alpha=0.7)
+        ax.axvline(x=0, color="red", linestyle="--", linewidth=1)
+        ax.axvline(
             x=weighted_returns.mean() * 100,
             color="green",
             linestyle="--",
             linewidth=2,
             label=f"Mean: {weighted_returns.mean()*100:.2f}%",
         )
-        plt.title("Daily Returns Distribution")
-        plt.xlabel("Daily Return (%)")
-        plt.ylabel("Frequency")
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.show()
+        ax.set_title("Daily Returns Distribution")
+        ax.set_xlabel("Daily Return (%)")
+        ax.set_ylabel("Frequency")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
+        if show:
+            plt.show()
+
+        return fig

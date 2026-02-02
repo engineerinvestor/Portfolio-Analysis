@@ -8,6 +8,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from portfolio_analysis.constants import (
+    DEFAULT_NUM_SIMULATIONS,
+    DEFAULT_PROJECTION_DAYS,
+    WEIGHT_SUM_TOLERANCE,
+)
+from portfolio_analysis.exceptions import ValidationError
+
 
 class MonteCarloSimulation:
     """
@@ -41,8 +48,8 @@ class MonteCarloSimulation:
         self,
         data: pd.DataFrame,
         weights: list[float],
-        num_simulations: int = 1000,
-        time_horizon: int = 252,
+        num_simulations: int = DEFAULT_NUM_SIMULATIONS,
+        time_horizon: int = DEFAULT_PROJECTION_DAYS,
         initial_investment: float = 10000,
     ):
         self.data = data
@@ -53,9 +60,14 @@ class MonteCarloSimulation:
 
         # Validate weights
         if len(self.weights) != len(data.columns):
-            raise ValueError("Weights must match number of assets")
-        if not np.isclose(sum(self.weights), 1.0):
-            raise ValueError("Weights must sum to 1.0")
+            raise ValidationError(
+                f"Number of weights ({len(self.weights)}) must match "
+                f"number of assets ({len(data.columns)})"
+            )
+        if not np.isclose(sum(self.weights), 1.0, atol=WEIGHT_SUM_TOLERANCE):
+            raise ValidationError(
+                f"Weights must sum to 1.0, got {sum(self.weights):.6f}"
+            )
 
         self._results = None
 
@@ -132,6 +144,7 @@ class MonteCarloSimulation:
         show_percentiles: bool = True,
         num_paths: int = 100,
         ax: Optional[plt.Axes] = None,
+        show: bool = True,
     ) -> plt.Axes:
         """
         Plot Monte Carlo simulation results with percentile bands.
@@ -144,6 +157,9 @@ class MonteCarloSimulation:
             Number of individual paths to plot
         ax : matplotlib.axes.Axes, optional
             Axes to plot on
+        show : bool, default True
+            Whether to display the plot. Set to False for automated/server contexts.
+            Only applies when ax is None.
 
         Returns
         -------
@@ -156,8 +172,10 @@ class MonteCarloSimulation:
         results = self._results
         stats = self.get_statistics()
 
+        created_fig = False
         if ax is None:
             fig, ax = plt.subplots(figsize=(12, 7))
+            created_fig = True
 
         # Plot a subset of individual paths
         paths_to_plot = min(num_paths, self.num_simulations)
@@ -229,6 +247,9 @@ class MonteCarloSimulation:
             horizontalalignment="right",
             bbox=props,
         )
+
+        if created_fig and show:
+            plt.show()
 
         return ax
 

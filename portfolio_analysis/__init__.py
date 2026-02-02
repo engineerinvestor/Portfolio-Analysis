@@ -5,8 +5,24 @@ An open-source Python package for analyzing investment portfolios,
 running Monte Carlo simulations, and comparing against benchmarks.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.1"
 __author__ = "Engineer Investor"
+
+# Constants and exceptions
+from portfolio_analysis.constants import (
+    DEFAULT_BENCHMARK,
+    DEFAULT_CONFIDENCE_LEVEL,
+    DEFAULT_RISK_FREE_RATE,
+    DAYS_PER_YEAR,
+    TRADING_DAYS_PER_YEAR,
+)
+from portfolio_analysis.exceptions import (
+    ConfigurationError,
+    DataError,
+    OptimizationError,
+    PortfolioAnalysisError,
+    ValidationError,
+)
 
 # Core classes - easy imports
 from portfolio_analysis.analysis.montecarlo import MonteCarloSimulation
@@ -58,7 +74,32 @@ except ImportError:
     FactorOptimizer = None
     FactorVisualization = None
 
+# Backtesting framework
+from portfolio_analysis.backtest import (
+    BacktestEngine,
+    BacktestMetrics,
+    BacktestResult,
+    BacktestVisualization,
+    BuyAndHoldStrategy,
+    MomentumStrategy,
+    RebalanceStrategy,
+    Strategy,
+)
+
 __all__ = [
+    # Constants
+    "TRADING_DAYS_PER_YEAR",
+    "DAYS_PER_YEAR",
+    "DEFAULT_RISK_FREE_RATE",
+    "DEFAULT_CONFIDENCE_LEVEL",
+    "DEFAULT_BENCHMARK",
+    # Exceptions
+    "PortfolioAnalysisError",
+    "ValidationError",
+    "DataError",
+    "OptimizationError",
+    "ConfigurationError",
+    # Core classes
     "DataLoader",
     "PerformanceMetrics",
     "BenchmarkComparison",
@@ -76,4 +117,13 @@ __all__ = [
     "FactorAttribution",
     "FactorOptimizer",
     "FactorVisualization",
+    # Backtesting
+    "BacktestEngine",
+    "BacktestResult",
+    "BacktestMetrics",
+    "BacktestVisualization",
+    "Strategy",
+    "BuyAndHoldStrategy",
+    "RebalanceStrategy",
+    "MomentumStrategy",
 ]
