@@ -31,17 +31,18 @@ class FactorDataLoader:
     """
 
     # French data library dataset names
-    FF3_DAILY = 'F-F_Research_Data_Factors_daily'
-    FF3_MONTHLY = 'F-F_Research_Data_Factors'
-    FF5_DAILY = 'F-F_Research_Data_5_Factors_2x3_daily'
-    FF5_MONTHLY = 'F-F_Research_Data_5_Factors_2x3'
-    MOM_DAILY = 'F-F_Momentum_Factor_daily'
-    MOM_MONTHLY = 'F-F_Momentum_Factor'
+    FF3_DAILY = "F-F_Research_Data_Factors_daily"
+    FF3_MONTHLY = "F-F_Research_Data_Factors"
+    FF5_DAILY = "F-F_Research_Data_5_Factors_2x3_daily"
+    FF5_MONTHLY = "F-F_Research_Data_5_Factors_2x3"
+    MOM_DAILY = "F-F_Momentum_Factor_daily"
+    MOM_MONTHLY = "F-F_Momentum_Factor"
 
     def __init__(self, cache_dir: Optional[str] = None):
         if cache_dir is None:
             import tempfile
-            cache_dir = os.path.join(tempfile.gettempdir(), 'ff_factors_cache')
+
+            cache_dir = os.path.join(tempfile.gettempdir(), "ff_factors_cache")
         self.cache_dir = cache_dir
         os.makedirs(self.cache_dir, exist_ok=True)
 
@@ -49,7 +50,9 @@ class FactorDataLoader:
         """Generate cache file path for a dataset."""
         return os.path.join(self.cache_dir, f"{dataset.replace('-', '_')}.parquet")
 
-    def _load_from_cache(self, dataset: str, max_age_days: int = 7) -> Optional[pd.DataFrame]:
+    def _load_from_cache(
+        self, dataset: str, max_age_days: int = 7
+    ) -> Optional[pd.DataFrame]:
         """Load data from cache if available and not stale."""
         cache_path = self._get_cache_path(dataset)
         if not os.path.exists(cache_path):
@@ -74,11 +77,7 @@ class FactorDataLoader:
         except Exception:
             pass  # Silently fail if caching doesn't work
 
-    def _fetch_french_data(
-        self,
-        dataset: str,
-        use_cache: bool = True
-    ) -> pd.DataFrame:
+    def _fetch_french_data(self, dataset: str, use_cache: bool = True) -> pd.DataFrame:
         """
         Fetch data from Kenneth French Data Library.
 
@@ -109,7 +108,7 @@ class FactorDataLoader:
             )
 
         # Fetch from French library
-        data = web.DataReader(dataset, 'famafrench', start='1900-01-01')
+        data = web.DataReader(dataset, "famafrench", start="1900-01-01")
 
         # web.DataReader returns a dict with multiple tables
         # First table (index 0) is typically the main data
@@ -132,7 +131,7 @@ class FactorDataLoader:
         self,
         data: pd.DataFrame,
         start_date: Union[str, datetime],
-        end_date: Union[str, datetime]
+        end_date: Union[str, datetime],
     ) -> pd.DataFrame:
         """Filter data to date range."""
         start = pd.to_datetime(start_date)
@@ -143,7 +142,7 @@ class FactorDataLoader:
         self,
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
-        frequency: str = 'daily'
+        frequency: str = "daily",
     ) -> pd.DataFrame:
         """
         Get Fama-French 3-factor data.
@@ -162,12 +161,14 @@ class FactorDataLoader:
         pd.DataFrame
             DataFrame with columns: Mkt-RF, SMB, HML, RF
         """
-        if frequency == 'daily':
+        if frequency == "daily":
             dataset = self.FF3_DAILY
-        elif frequency == 'monthly':
+        elif frequency == "monthly":
             dataset = self.FF3_MONTHLY
         else:
-            raise ValueError(f"Frequency must be 'daily' or 'monthly', got: {frequency}")
+            raise ValueError(
+                f"Frequency must be 'daily' or 'monthly', got: {frequency}"
+            )
 
         data = self._fetch_french_data(dataset)
         return self._filter_dates(data, start_date, end_date)
@@ -176,7 +177,7 @@ class FactorDataLoader:
         self,
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
-        frequency: str = 'daily'
+        frequency: str = "daily",
     ) -> pd.DataFrame:
         """
         Get Fama-French 5-factor data.
@@ -195,12 +196,14 @@ class FactorDataLoader:
         pd.DataFrame
             DataFrame with columns: Mkt-RF, SMB, HML, RMW, CMA, RF
         """
-        if frequency == 'daily':
+        if frequency == "daily":
             dataset = self.FF5_DAILY
-        elif frequency == 'monthly':
+        elif frequency == "monthly":
             dataset = self.FF5_MONTHLY
         else:
-            raise ValueError(f"Frequency must be 'daily' or 'monthly', got: {frequency}")
+            raise ValueError(
+                f"Frequency must be 'daily' or 'monthly', got: {frequency}"
+            )
 
         data = self._fetch_french_data(dataset)
         return self._filter_dates(data, start_date, end_date)
@@ -209,7 +212,7 @@ class FactorDataLoader:
         self,
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
-        frequency: str = 'daily'
+        frequency: str = "daily",
     ) -> pd.Series:
         """
         Get momentum factor data.
@@ -228,21 +231,23 @@ class FactorDataLoader:
         pd.Series
             Momentum factor (MOM or WML)
         """
-        if frequency == 'daily':
+        if frequency == "daily":
             dataset = self.MOM_DAILY
-        elif frequency == 'monthly':
+        elif frequency == "monthly":
             dataset = self.MOM_MONTHLY
         else:
-            raise ValueError(f"Frequency must be 'daily' or 'monthly', got: {frequency}")
+            raise ValueError(
+                f"Frequency must be 'daily' or 'monthly', got: {frequency}"
+            )
 
         data = self._fetch_french_data(dataset)
         filtered = self._filter_dates(data, start_date, end_date)
 
         # Return as Series, column name varies
-        if 'Mom' in filtered.columns:
-            return filtered['Mom']
-        elif 'WML' in filtered.columns:
-            return filtered['WML']
+        if "Mom" in filtered.columns:
+            return filtered["Mom"]
+        elif "WML" in filtered.columns:
+            return filtered["WML"]
         else:
             return filtered.iloc[:, 0]
 
@@ -250,7 +255,7 @@ class FactorDataLoader:
         self,
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
-        frequency: str = 'daily'
+        frequency: str = "daily",
     ) -> pd.DataFrame:
         """
         Get Carhart 4-factor data (FF3 + Momentum).
@@ -275,17 +280,15 @@ class FactorDataLoader:
         # Align dates
         common_dates = ff3.index.intersection(mom.index)
         result = ff3.loc[common_dates].copy()
-        result['MOM'] = mom.loc[common_dates]
+        result["MOM"] = mom.loc[common_dates]
 
         # Reorder columns to put MOM before RF
-        cols = ['Mkt-RF', 'SMB', 'HML', 'MOM', 'RF']
+        cols = ["Mkt-RF", "SMB", "HML", "MOM", "RF"]
         return result[cols]
 
 
 def align_returns_with_factors(
-    returns: pd.Series,
-    factor_data: pd.DataFrame,
-    compute_excess: bool = True
+    returns: pd.Series, factor_data: pd.DataFrame, compute_excess: bool = True
 ) -> tuple:
     """
     Align portfolio returns with factor data and compute excess returns.
@@ -316,8 +319,8 @@ def align_returns_with_factors(
     aligned_returns = returns.loc[common_dates]
     aligned_factors = factor_data.loc[common_dates]
 
-    if compute_excess and 'RF' in aligned_factors.columns:
-        excess_returns = aligned_returns - aligned_factors['RF']
+    if compute_excess and "RF" in aligned_factors.columns:
+        excess_returns = aligned_returns - aligned_factors["RF"]
     else:
         excess_returns = aligned_returns
 

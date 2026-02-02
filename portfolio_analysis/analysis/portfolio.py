@@ -165,23 +165,23 @@ class PortfolioAnalysis:
             Dictionary of portfolio metrics
         """
         return {
-            'annual_return': self.calculate_portfolio_return(),
-            'annual_volatility': self.calculate_portfolio_volatility(),
-            'sharpe_ratio': self.calculate_portfolio_sharpe_ratio(risk_free_rate),
-            'sortino_ratio': self.calculate_sortino_ratio(risk_free_rate),
-            'max_drawdown': self.calculate_max_drawdown(),
+            "annual_return": self.calculate_portfolio_return(),
+            "annual_volatility": self.calculate_portfolio_volatility(),
+            "sharpe_ratio": self.calculate_portfolio_sharpe_ratio(risk_free_rate),
+            "sortino_ratio": self.calculate_sortino_ratio(risk_free_rate),
+            "max_drawdown": self.calculate_max_drawdown(),
         }
 
     def print_summary(self, risk_free_rate: float = 0.02) -> None:
         """Print a formatted summary of portfolio metrics."""
         summary = self.get_summary(risk_free_rate)
 
-        print("\n" + "="*40)
+        print("\n" + "=" * 40)
         print("PORTFOLIO SUMMARY")
-        print("="*40)
+        print("=" * 40)
         print(f"Annual Return:     {summary['annual_return']*100:>10.2f}%")
         print(f"Annual Volatility: {summary['annual_volatility']*100:>10.2f}%")
         print(f"Sharpe Ratio:      {summary['sharpe_ratio']:>10.2f}")
         print(f"Sortino Ratio:     {summary['sortino_ratio']:>10.2f}")
         print(f"Max Drawdown:      {summary['max_drawdown']*100:>10.2f}%")
-        print("="*40)
+        print("=" * 40)

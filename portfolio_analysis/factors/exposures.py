@@ -34,11 +34,7 @@ class FactorExposures:
     LARGE_CAP_THRESHOLD = 10.0
     SMALL_CAP_THRESHOLD = 2.0
 
-    def __init__(
-        self,
-        tickers: List[str],
-        weights: List[float]
-    ):
+    def __init__(self, tickers: List[str], weights: List[float]):
         if len(tickers) != len(weights):
             raise ValueError("Number of tickers must match number of weights")
 
@@ -58,36 +54,40 @@ class FactorExposures:
         for ticker in self.tickers:
             try:
                 info = yf.Ticker(ticker).info
-                data.append({
-                    'ticker': ticker,
-                    'market_cap': info.get('marketCap', None),
-                    'pe_ratio': info.get('trailingPE', info.get('forwardPE', None)),
-                    'pb_ratio': info.get('priceToBook', None),
-                    'dividend_yield': info.get('dividendYield', 0) or 0,
-                    'beta': info.get('beta', None),
-                    'profit_margin': info.get('profitMargins', None),
-                    'roe': info.get('returnOnEquity', None),
-                    'debt_to_equity': info.get('debtToEquity', None),
-                    'revenue_growth': info.get('revenueGrowth', None),
-                    'earnings_growth': info.get('earningsGrowth', None),
-                })
+                data.append(
+                    {
+                        "ticker": ticker,
+                        "market_cap": info.get("marketCap", None),
+                        "pe_ratio": info.get("trailingPE", info.get("forwardPE", None)),
+                        "pb_ratio": info.get("priceToBook", None),
+                        "dividend_yield": info.get("dividendYield", 0) or 0,
+                        "beta": info.get("beta", None),
+                        "profit_margin": info.get("profitMargins", None),
+                        "roe": info.get("returnOnEquity", None),
+                        "debt_to_equity": info.get("debtToEquity", None),
+                        "revenue_growth": info.get("revenueGrowth", None),
+                        "earnings_growth": info.get("earningsGrowth", None),
+                    }
+                )
             except Exception:
                 # Use defaults for ETFs or failed lookups
-                data.append({
-                    'ticker': ticker,
-                    'market_cap': None,
-                    'pe_ratio': None,
-                    'pb_ratio': None,
-                    'dividend_yield': 0,
-                    'beta': 1.0,
-                    'profit_margin': None,
-                    'roe': None,
-                    'debt_to_equity': None,
-                    'revenue_growth': None,
-                    'earnings_growth': None,
-                })
+                data.append(
+                    {
+                        "ticker": ticker,
+                        "market_cap": None,
+                        "pe_ratio": None,
+                        "pb_ratio": None,
+                        "dividend_yield": 0,
+                        "beta": 1.0,
+                        "profit_margin": None,
+                        "roe": None,
+                        "debt_to_equity": None,
+                        "revenue_growth": None,
+                        "earnings_growth": None,
+                    }
+                )
 
-        self._characteristics = pd.DataFrame(data).set_index('ticker')
+        self._characteristics = pd.DataFrame(data).set_index("ticker")
         return self._characteristics
 
     def _calculate_momentum(self, lookback_months: int = 12) -> pd.Series:
@@ -99,18 +99,15 @@ class FactorExposures:
 
         try:
             prices = yf.download(
-                self.tickers,
-                start=start_date,
-                end=end_date,
-                progress=False
+                self.tickers, start=start_date, end=end_date, progress=False
             )
 
             # Handle column format
             if isinstance(prices.columns, pd.MultiIndex):
-                if 'Adj Close' in prices.columns.get_level_values(0):
-                    prices = prices['Adj Close']
+                if "Adj Close" in prices.columns.get_level_values(0):
+                    prices = prices["Adj Close"]
                 else:
-                    prices = prices['Close']
+                    prices = prices["Close"]
 
             # Calculate momentum (skip most recent month)
             if len(prices) > 21:
@@ -136,7 +133,7 @@ class FactorExposures:
         chars = self._fetch_characteristics()
 
         # Convert market cap to billions
-        market_caps = chars['market_cap'].fillna(chars['market_cap'].median())
+        market_caps = chars["market_cap"].fillna(chars["market_cap"].median())
         market_caps_b = market_caps / 1e9
 
         # Score each holding: -1 for large, 0 for mid, +1 for small
@@ -151,8 +148,10 @@ class FactorExposures:
             else:
                 # Linear interpolation for mid-cap
                 scores.append(
-                    (self.LARGE_CAP_THRESHOLD - mc) /
-                    (self.LARGE_CAP_THRESHOLD - self.SMALL_CAP_THRESHOLD) * 2 - 1
+                    (self.LARGE_CAP_THRESHOLD - mc)
+                    / (self.LARGE_CAP_THRESHOLD - self.SMALL_CAP_THRESHOLD)
+                    * 2
+                    - 1
                 )
 
         return float(np.dot(scores, self.weights))
@@ -170,8 +169,8 @@ class FactorExposures:
         chars = self._fetch_characteristics()
 
         # Use P/B ratio primarily, P/E as backup
-        pb_ratios = chars['pb_ratio'].fillna(chars['pb_ratio'].median())
-        pe_ratios = chars['pe_ratio'].fillna(chars['pe_ratio'].median())
+        pb_ratios = chars["pb_ratio"].fillna(chars["pb_ratio"].median())
+        pe_ratios = chars["pe_ratio"].fillna(chars["pe_ratio"].median())
 
         # Score based on valuation: low P/B = value (+1), high P/B = growth (-1)
         # Typical P/B ranges: <1 deep value, 1-3 neutral, >3 growth
@@ -250,7 +249,7 @@ class FactorExposures:
             debt_score = 0
 
             # Profit margin (>15% good, <5% poor)
-            pm = row.get('profit_margin')
+            pm = row.get("profit_margin")
             if pd.notna(pm):
                 if pm > 0.15:
                     profit_score = 1
@@ -260,7 +259,7 @@ class FactorExposures:
                     profit_score = (pm - 0.05) / 0.10 * 2 - 1
 
             # ROE (>15% good, <8% poor)
-            roe = row.get('roe')
+            roe = row.get("roe")
             if pd.notna(roe):
                 if roe > 0.15:
                     roe_score = 1
@@ -270,7 +269,7 @@ class FactorExposures:
                     roe_score = (roe - 0.08) / 0.07 * 2 - 1
 
             # Debt/Equity (low is better: <50% good, >150% poor)
-            de = row.get('debt_to_equity')
+            de = row.get("debt_to_equity")
             if pd.notna(de):
                 de_ratio = de / 100  # Often reported as percentage
                 if de_ratio < 0.5:
@@ -304,7 +303,7 @@ class FactorExposures:
             row = chars.loc[ticker]
 
             # Use revenue growth as proxy for investment aggressiveness
-            rev_growth = row.get('revenue_growth')
+            rev_growth = row.get("revenue_growth")
             if pd.notna(rev_growth):
                 # High growth = aggressive (-1), low growth = conservative (+1)
                 if rev_growth > 0.20:
@@ -334,11 +333,11 @@ class FactorExposures:
             - investment: CMA-like exposure
         """
         return {
-            'size': self.calculate_size_tilt(),
-            'value': self.calculate_value_tilt(),
-            'momentum': self.calculate_momentum_tilt(),
-            'quality': self.calculate_quality_tilt(),
-            'investment': self.calculate_investment_tilt(),
+            "size": self.calculate_size_tilt(),
+            "value": self.calculate_value_tilt(),
+            "momentum": self.calculate_momentum_tilt(),
+            "quality": self.calculate_quality_tilt(),
+            "investment": self.calculate_investment_tilt(),
         }
 
     def get_characteristics_table(self) -> pd.DataFrame:
@@ -351,12 +350,22 @@ class FactorExposures:
             Characteristics for each holding with portfolio weight
         """
         chars = self._fetch_characteristics().copy()
-        chars['weight'] = self.weights
+        chars["weight"] = self.weights
 
         # Reorder columns
-        cols = ['weight', 'market_cap', 'pe_ratio', 'pb_ratio',
-                'dividend_yield', 'beta', 'profit_margin', 'roe',
-                'debt_to_equity', 'revenue_growth', 'earnings_growth']
+        cols = [
+            "weight",
+            "market_cap",
+            "pe_ratio",
+            "pb_ratio",
+            "dividend_yield",
+            "beta",
+            "profit_margin",
+            "roe",
+            "debt_to_equity",
+            "revenue_growth",
+            "earnings_growth",
+        ]
         available_cols = [c for c in cols if c in chars.columns]
 
         return chars[available_cols]
@@ -374,16 +383,28 @@ class FactorExposures:
         ]
 
         interpretations = {
-            'size': lambda x: 'Small Cap' if x > 0.3 else ('Large Cap' if x < -0.3 else 'Neutral'),
-            'value': lambda x: 'Value' if x > 0.3 else ('Growth' if x < -0.3 else 'Blend'),
-            'momentum': lambda x: 'High Mom' if x > 0.3 else ('Low Mom' if x < -0.3 else 'Neutral'),
-            'quality': lambda x: 'High Quality' if x > 0.3 else ('Low Quality' if x < -0.3 else 'Neutral'),
-            'investment': lambda x: 'Conservative' if x > 0.3 else ('Aggressive' if x < -0.3 else 'Neutral'),
+            "size": lambda x: (
+                "Small Cap" if x > 0.3 else ("Large Cap" if x < -0.3 else "Neutral")
+            ),
+            "value": lambda x: (
+                "Value" if x > 0.3 else ("Growth" if x < -0.3 else "Blend")
+            ),
+            "momentum": lambda x: (
+                "High Mom" if x > 0.3 else ("Low Mom" if x < -0.3 else "Neutral")
+            ),
+            "quality": lambda x: (
+                "High Quality"
+                if x > 0.3
+                else ("Low Quality" if x < -0.3 else "Neutral")
+            ),
+            "investment": lambda x: (
+                "Conservative" if x > 0.3 else ("Aggressive" if x < -0.3 else "Neutral")
+            ),
         }
 
         for factor, tilt in tilts.items():
             interp = interpretations[factor](tilt)
             lines.append(f"{factor.capitalize():<15} {tilt:>10.2f} {interp:<25}")
 
-        lines.append('=' * 50)
-        return '\n'.join(lines)
+        lines.append("=" * 50)
+        return "\n".join(lines)

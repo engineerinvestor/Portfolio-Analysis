@@ -38,19 +38,33 @@ class ReturnsSection(ReportSection):
         monthly = (1 + returns).resample("M").prod() - 1
 
         # Create year-month matrix
-        monthly_df = pd.DataFrame({
-            "year": monthly.index.year,
-            "month": monthly.index.month,
-            "return": monthly.values
-        })
+        monthly_df = pd.DataFrame(
+            {
+                "year": monthly.index.year,
+                "month": monthly.index.month,
+                "return": monthly.values,
+            }
+        )
 
         # Pivot to matrix format
         matrix = monthly_df.pivot(index="year", columns="month", values="return")
 
         # Rename columns to month abbreviations
-        month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        matrix.columns = [month_names[m-1] for m in matrix.columns]
+        month_names = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
+        matrix.columns = [month_names[m - 1] for m in matrix.columns]
 
         return matrix
 
@@ -65,8 +79,7 @@ class ReturnsSection(ReportSection):
 
         # Create heatmap
         data = matrix.values * 100
-        im = ax.imshow(data, cmap="RdYlGn", aspect="auto",
-                       vmin=-10, vmax=10)
+        im = ax.imshow(data, cmap="RdYlGn", aspect="auto", vmin=-10, vmax=10)
 
         # Set ticks
         ax.set_xticks(np.arange(len(matrix.columns)))
@@ -80,8 +93,15 @@ class ReturnsSection(ReportSection):
                 value = data[i, j]
                 if not np.isnan(value):
                     text_color = "white" if abs(value) > 5 else "black"
-                    ax.text(j, i, f"{value:.1f}%", ha="center", va="center",
-                            color=text_color, fontsize=8)
+                    ax.text(
+                        j,
+                        i,
+                        f"{value:.1f}%",
+                        ha="center",
+                        va="center",
+                        color=text_color,
+                        fontsize=8,
+                    )
 
         ax.set_title("Monthly Returns (%)", fontsize=12, fontweight="bold")
 
@@ -125,7 +145,6 @@ class ReturnsSection(ReportSection):
             "total_months": total_months,
             "win_rate": win_rate,
             "annual_returns": [
-                {"year": idx.year, "return": val * 100}
-                for idx, val in annual.items()
+                {"year": idx.year, "return": val * 100} for idx, val in annual.items()
             ],
         }

@@ -23,7 +23,9 @@ class PerformanceMetrics:
     TRADING_DAYS = 252
 
     @staticmethod
-    def calculate_annual_return(data: Union[pd.Series, pd.DataFrame]) -> Union[float, pd.Series]:
+    def calculate_annual_return(
+        data: Union[pd.Series, pd.DataFrame],
+    ) -> Union[float, pd.Series]:
         """
         Calculate annualized return from price data.
 
@@ -39,7 +41,7 @@ class PerformanceMetrics:
         float or pd.Series
             Annualized return(s)
         """
-        annual_return = data.resample('Y').last().pct_change().mean()
+        annual_return = data.resample("Y").last().pct_change().mean()
         return annual_return
 
     @staticmethod
@@ -65,7 +67,9 @@ class PerformanceMetrics:
         return cagr
 
     @staticmethod
-    def calculate_annual_volatility(data: Union[pd.Series, pd.DataFrame]) -> Union[float, pd.Series]:
+    def calculate_annual_volatility(
+        data: Union[pd.Series, pd.DataFrame],
+    ) -> Union[float, pd.Series]:
         """
         Calculate annualized volatility (standard deviation of returns).
 
@@ -80,13 +84,14 @@ class PerformanceMetrics:
             Annualized volatility
         """
         daily_returns = data.pct_change().dropna()
-        annual_volatility = daily_returns.std() * np.sqrt(PerformanceMetrics.TRADING_DAYS)
+        annual_volatility = daily_returns.std() * np.sqrt(
+            PerformanceMetrics.TRADING_DAYS
+        )
         return annual_volatility
 
     @staticmethod
     def calculate_sharpe_ratio(
-        data: Union[pd.Series, pd.DataFrame],
-        risk_free_rate: float = 0.02
+        data: Union[pd.Series, pd.DataFrame], risk_free_rate: float = 0.02
     ) -> Union[float, pd.Series]:
         """
         Calculate Sharpe ratio.
@@ -112,8 +117,7 @@ class PerformanceMetrics:
 
     @staticmethod
     def calculate_sortino_ratio(
-        data: Union[pd.Series, pd.DataFrame],
-        risk_free_rate: float = 0.02
+        data: Union[pd.Series, pd.DataFrame], risk_free_rate: float = 0.02
     ) -> Union[float, pd.Series]:
         """
         Calculate Sortino ratio (uses downside deviation instead of volatility).
@@ -138,14 +142,18 @@ class PerformanceMetrics:
         else:
             downside_returns = returns[returns < 0]
 
-        downside_deviation = downside_returns.std() * np.sqrt(PerformanceMetrics.TRADING_DAYS)
+        downside_deviation = downside_returns.std() * np.sqrt(
+            PerformanceMetrics.TRADING_DAYS
+        )
         annual_return = PerformanceMetrics.calculate_annual_return(data)
 
         sortino_ratio = (annual_return - risk_free_rate) / downside_deviation
         return sortino_ratio
 
     @staticmethod
-    def calculate_max_drawdown(data: Union[pd.Series, pd.DataFrame]) -> Union[float, pd.Series]:
+    def calculate_max_drawdown(
+        data: Union[pd.Series, pd.DataFrame],
+    ) -> Union[float, pd.Series]:
         """
         Calculate maximum drawdown.
 
@@ -169,8 +177,7 @@ class PerformanceMetrics:
 
     @staticmethod
     def calculate_var(
-        data: Union[pd.Series, pd.DataFrame],
-        confidence_level: float = 0.95
+        data: Union[pd.Series, pd.DataFrame], confidence_level: float = 0.95
     ) -> Union[float, pd.Series]:
         """
         Calculate Value at Risk (VaR) using historical method.
@@ -196,7 +203,7 @@ class PerformanceMetrics:
 
     @staticmethod
     def calculate_calmar_ratio(
-        data: Union[pd.Series, pd.DataFrame]
+        data: Union[pd.Series, pd.DataFrame],
     ) -> Union[float, pd.Series]:
         """
         Calculate Calmar ratio (CAGR / Max Drawdown).

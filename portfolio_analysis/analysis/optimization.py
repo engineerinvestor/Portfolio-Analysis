@@ -62,10 +62,7 @@ class PortfolioOptimizer:
         """Negative Sharpe for minimization."""
         return -self._portfolio_sharpe(weights)
 
-    def optimize_max_sharpe(
-        self,
-        weight_bounds: Tuple[float, float] = (0, 1)
-    ) -> Dict:
+    def optimize_max_sharpe(self, weight_bounds: Tuple[float, float] = (0, 1)) -> Dict:
         """
         Find the portfolio with maximum Sharpe ratio.
 
@@ -79,29 +76,28 @@ class PortfolioOptimizer:
         dict
             Optimal weights, return, volatility, and Sharpe ratio
         """
-        constraints = {'type': 'eq', 'fun': lambda x: np.sum(x) - 1}
+        constraints = {"type": "eq", "fun": lambda x: np.sum(x) - 1}
         bounds = tuple(weight_bounds for _ in range(self.n_assets))
-        initial_weights = np.array([1/self.n_assets] * self.n_assets)
+        initial_weights = np.array([1 / self.n_assets] * self.n_assets)
 
         result = minimize(
             self._neg_sharpe,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
 
         optimal_weights = result.x
         return {
-            'weights': dict(zip(self.tickers, optimal_weights)),
-            'return': self._portfolio_return(optimal_weights),
-            'volatility': self._portfolio_volatility(optimal_weights),
-            'sharpe_ratio': self._portfolio_sharpe(optimal_weights)
+            "weights": dict(zip(self.tickers, optimal_weights)),
+            "return": self._portfolio_return(optimal_weights),
+            "volatility": self._portfolio_volatility(optimal_weights),
+            "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
         }
 
     def optimize_min_volatility(
-        self,
-        weight_bounds: Tuple[float, float] = (0, 1)
+        self, weight_bounds: Tuple[float, float] = (0, 1)
     ) -> Dict:
         """
         Find the minimum volatility portfolio.
@@ -116,30 +112,28 @@ class PortfolioOptimizer:
         dict
             Optimal weights, return, volatility, and Sharpe ratio
         """
-        constraints = {'type': 'eq', 'fun': lambda x: np.sum(x) - 1}
+        constraints = {"type": "eq", "fun": lambda x: np.sum(x) - 1}
         bounds = tuple(weight_bounds for _ in range(self.n_assets))
-        initial_weights = np.array([1/self.n_assets] * self.n_assets)
+        initial_weights = np.array([1 / self.n_assets] * self.n_assets)
 
         result = minimize(
             self._portfolio_volatility,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
 
         optimal_weights = result.x
         return {
-            'weights': dict(zip(self.tickers, optimal_weights)),
-            'return': self._portfolio_return(optimal_weights),
-            'volatility': self._portfolio_volatility(optimal_weights),
-            'sharpe_ratio': self._portfolio_sharpe(optimal_weights)
+            "weights": dict(zip(self.tickers, optimal_weights)),
+            "return": self._portfolio_return(optimal_weights),
+            "volatility": self._portfolio_volatility(optimal_weights),
+            "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
         }
 
     def optimize_target_return(
-        self,
-        target_return: float,
-        weight_bounds: Tuple[float, float] = (0, 1)
+        self, target_return: float, weight_bounds: Tuple[float, float] = (0, 1)
     ) -> Dict:
         """
         Find minimum volatility portfolio for a target return.
@@ -157,26 +151,26 @@ class PortfolioOptimizer:
             Optimal weights, return, volatility, and Sharpe ratio
         """
         constraints = [
-            {'type': 'eq', 'fun': lambda x: np.sum(x) - 1},
-            {'type': 'eq', 'fun': lambda x: self._portfolio_return(x) - target_return}
+            {"type": "eq", "fun": lambda x: np.sum(x) - 1},
+            {"type": "eq", "fun": lambda x: self._portfolio_return(x) - target_return},
         ]
         bounds = tuple(weight_bounds for _ in range(self.n_assets))
-        initial_weights = np.array([1/self.n_assets] * self.n_assets)
+        initial_weights = np.array([1 / self.n_assets] * self.n_assets)
 
         result = minimize(
             self._portfolio_volatility,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
 
         optimal_weights = result.x
         return {
-            'weights': dict(zip(self.tickers, optimal_weights)),
-            'return': self._portfolio_return(optimal_weights),
-            'volatility': self._portfolio_volatility(optimal_weights),
-            'sharpe_ratio': self._portfolio_sharpe(optimal_weights)
+            "weights": dict(zip(self.tickers, optimal_weights)),
+            "return": self._portfolio_return(optimal_weights),
+            "volatility": self._portfolio_volatility(optimal_weights),
+            "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
         }
 
     def optimize_risk_parity(self) -> Dict:
@@ -190,6 +184,7 @@ class PortfolioOptimizer:
         dict
             Optimal weights, return, volatility, and Sharpe ratio
         """
+
         def risk_contribution(weights):
             """Calculate risk contribution of each asset."""
             port_vol = self._portfolio_volatility(weights)
@@ -203,31 +198,31 @@ class PortfolioOptimizer:
             target_rc = np.mean(rc)
             return np.sum((rc - target_rc) ** 2)
 
-        constraints = {'type': 'eq', 'fun': lambda x: np.sum(x) - 1}
+        constraints = {"type": "eq", "fun": lambda x: np.sum(x) - 1}
         bounds = tuple((0.01, 1) for _ in range(self.n_assets))  # Min 1% per asset
-        initial_weights = np.array([1/self.n_assets] * self.n_assets)
+        initial_weights = np.array([1 / self.n_assets] * self.n_assets)
 
         result = minimize(
             risk_parity_objective,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
 
         optimal_weights = result.x
         return {
-            'weights': dict(zip(self.tickers, optimal_weights)),
-            'return': self._portfolio_return(optimal_weights),
-            'volatility': self._portfolio_volatility(optimal_weights),
-            'sharpe_ratio': self._portfolio_sharpe(optimal_weights),
-            'risk_contributions': dict(zip(self.tickers, risk_contribution(optimal_weights)))
+            "weights": dict(zip(self.tickers, optimal_weights)),
+            "return": self._portfolio_return(optimal_weights),
+            "volatility": self._portfolio_volatility(optimal_weights),
+            "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
+            "risk_contributions": dict(
+                zip(self.tickers, risk_contribution(optimal_weights))
+            ),
         }
 
     def generate_efficient_frontier(
-        self,
-        n_points: int = 50,
-        weight_bounds: Tuple[float, float] = (0, 1)
+        self, n_points: int = 50, weight_bounds: Tuple[float, float] = (0, 1)
     ) -> pd.DataFrame:
         """
         Generate points on the efficient frontier.
@@ -248,7 +243,7 @@ class PortfolioOptimizer:
         min_vol = self.optimize_min_volatility(weight_bounds)
         max_sharpe = self.optimize_max_sharpe(weight_bounds)
 
-        min_ret = min_vol['return']
+        min_ret = min_vol["return"]
         max_ret = max(self.mean_returns)
 
         target_returns = np.linspace(min_ret, max_ret, n_points)
@@ -257,11 +252,13 @@ class PortfolioOptimizer:
         for target in target_returns:
             try:
                 portfolio = self.optimize_target_return(target, weight_bounds)
-                frontier.append({
-                    'return': portfolio['return'],
-                    'volatility': portfolio['volatility'],
-                    'sharpe_ratio': portfolio['sharpe_ratio']
-                })
+                frontier.append(
+                    {
+                        "return": portfolio["return"],
+                        "volatility": portfolio["volatility"],
+                        "sharpe_ratio": portfolio["sharpe_ratio"],
+                    }
+                )
             except:
                 continue
 
@@ -272,7 +269,7 @@ class PortfolioOptimizer:
         n_points: int = 50,
         show_assets: bool = True,
         show_optimal: bool = True,
-        weight_bounds: Tuple[float, float] = (0, 1)
+        weight_bounds: Tuple[float, float] = (0, 1),
     ) -> None:
         """
         Plot the efficient frontier with optimal portfolios marked.
@@ -294,9 +291,11 @@ class PortfolioOptimizer:
 
         # Plot efficient frontier
         plt.plot(
-            frontier['volatility'] * 100,
-            frontier['return'] * 100,
-            'b-', linewidth=2, label='Efficient Frontier'
+            frontier["volatility"] * 100,
+            frontier["return"] * 100,
+            "b-",
+            linewidth=2,
+            label="Efficient Frontier",
         )
 
         if show_assets:
@@ -305,29 +304,37 @@ class PortfolioOptimizer:
                 plt.scatter(
                     np.sqrt(self.cov_matrix.iloc[i, i]) * 100,
                     self.mean_returns.iloc[i] * 100,
-                    s=100, marker='o', label=ticker
+                    s=100,
+                    marker="o",
+                    label=ticker,
                 )
 
         if show_optimal:
             # Mark max Sharpe portfolio
             max_sharpe = self.optimize_max_sharpe(weight_bounds)
             plt.scatter(
-                max_sharpe['volatility'] * 100,
-                max_sharpe['return'] * 100,
-                s=200, marker='*', c='red', label='Max Sharpe'
+                max_sharpe["volatility"] * 100,
+                max_sharpe["return"] * 100,
+                s=200,
+                marker="*",
+                c="red",
+                label="Max Sharpe",
             )
 
             # Mark min volatility portfolio
             min_vol = self.optimize_min_volatility(weight_bounds)
             plt.scatter(
-                min_vol['volatility'] * 100,
-                min_vol['return'] * 100,
-                s=200, marker='*', c='green', label='Min Volatility'
+                min_vol["volatility"] * 100,
+                min_vol["return"] * 100,
+                s=200,
+                marker="*",
+                c="green",
+                label="Min Volatility",
             )
 
-        plt.xlabel('Volatility (%)')
-        plt.ylabel('Expected Return (%)')
-        plt.title('Efficient Frontier')
+        plt.xlabel("Volatility (%)")
+        plt.ylabel("Expected Return (%)")
+        plt.title("Efficient Frontier")
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
@@ -335,44 +342,52 @@ class PortfolioOptimizer:
 
     def print_comparison(self, weight_bounds: Tuple[float, float] = (0, 1)) -> None:
         """Print comparison of optimization strategies."""
-        equal_weight = np.array([1/self.n_assets] * self.n_assets)
+        equal_weight = np.array([1 / self.n_assets] * self.n_assets)
         max_sharpe = self.optimize_max_sharpe(weight_bounds)
         min_vol = self.optimize_min_volatility(weight_bounds)
         risk_parity = self.optimize_risk_parity()
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PORTFOLIO OPTIMIZATION COMPARISON")
-        print("="*70)
+        print("=" * 70)
         print(f"{'Strategy':<20} {'Return':>12} {'Volatility':>12} {'Sharpe':>10}")
-        print("-"*70)
+        print("-" * 70)
 
         # Equal weight
-        print(f"{'Equal Weight':<20} "
-              f"{self._portfolio_return(equal_weight)*100:>11.2f}% "
-              f"{self._portfolio_volatility(equal_weight)*100:>11.2f}% "
-              f"{self._portfolio_sharpe(equal_weight):>10.2f}")
+        print(
+            f"{'Equal Weight':<20} "
+            f"{self._portfolio_return(equal_weight)*100:>11.2f}% "
+            f"{self._portfolio_volatility(equal_weight)*100:>11.2f}% "
+            f"{self._portfolio_sharpe(equal_weight):>10.2f}"
+        )
 
         # Max Sharpe
-        print(f"{'Max Sharpe':<20} "
-              f"{max_sharpe['return']*100:>11.2f}% "
-              f"{max_sharpe['volatility']*100:>11.2f}% "
-              f"{max_sharpe['sharpe_ratio']:>10.2f}")
+        print(
+            f"{'Max Sharpe':<20} "
+            f"{max_sharpe['return']*100:>11.2f}% "
+            f"{max_sharpe['volatility']*100:>11.2f}% "
+            f"{max_sharpe['sharpe_ratio']:>10.2f}"
+        )
 
         # Min Volatility
-        print(f"{'Min Volatility':<20} "
-              f"{min_vol['return']*100:>11.2f}% "
-              f"{min_vol['volatility']*100:>11.2f}% "
-              f"{min_vol['sharpe_ratio']:>10.2f}")
+        print(
+            f"{'Min Volatility':<20} "
+            f"{min_vol['return']*100:>11.2f}% "
+            f"{min_vol['volatility']*100:>11.2f}% "
+            f"{min_vol['sharpe_ratio']:>10.2f}"
+        )
 
         # Risk Parity
-        print(f"{'Risk Parity':<20} "
-              f"{risk_parity['return']*100:>11.2f}% "
-              f"{risk_parity['volatility']*100:>11.2f}% "
-              f"{risk_parity['sharpe_ratio']:>10.2f}")
+        print(
+            f"{'Risk Parity':<20} "
+            f"{risk_parity['return']*100:>11.2f}% "
+            f"{risk_parity['volatility']*100:>11.2f}% "
+            f"{risk_parity['sharpe_ratio']:>10.2f}"
+        )
 
-        print("="*70)
+        print("=" * 70)
 
         print("\nOptimal Weights (Max Sharpe):")
-        for ticker, weight in max_sharpe['weights'].items():
+        for ticker, weight in max_sharpe["weights"].items():
             if weight > 0.01:
                 print(f"  {ticker}: {weight*100:.1f}%")

@@ -34,7 +34,7 @@ class HeaderSection(ReportSection):
         portfolio: PortfolioAnalysis,
         template: Template,
         title: Optional[str] = None,
-        tickers: Optional[List[str]] = None
+        tickers: Optional[List[str]] = None,
     ):
         super().__init__(template)
         self.portfolio = portfolio
@@ -47,7 +47,9 @@ class HeaderSection(ReportSection):
         cumulative = self.portfolio.calculate_cumulative_returns()
 
         # Calculate CAGR
-        years = (self.portfolio.data.index[-1] - self.portfolio.data.index[0]).days / 365.25
+        years = (
+            self.portfolio.data.index[-1] - self.portfolio.data.index[0]
+        ).days / 365.25
         cagr = (cumulative.iloc[-1] ** (1 / years)) - 1 if years > 0 else 0
 
         # Calculate total return
@@ -72,5 +74,5 @@ class HeaderSection(ReportSection):
                 "sharpe_ratio": summary["sharpe_ratio"],
                 "sortino_ratio": summary["sortino_ratio"],
                 "max_drawdown": summary["max_drawdown"] * 100,
-            }
+            },
         }

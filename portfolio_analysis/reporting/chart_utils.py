@@ -14,10 +14,7 @@ from matplotlib.figure import Figure
 
 
 def fig_to_base64(
-    fig: Figure,
-    format: str = "png",
-    dpi: int = 100,
-    close_fig: bool = True
+    fig: Figure, format: str = "png", dpi: int = 100, close_fig: bool = True
 ) -> str:
     """
     Convert a matplotlib figure to a base64-encoded string.
@@ -39,8 +36,14 @@ def fig_to_base64(
         Base64-encoded image string suitable for HTML img src
     """
     buffer = io.BytesIO()
-    fig.savefig(buffer, format=format, dpi=dpi, bbox_inches="tight",
-                facecolor="white", edgecolor="none")
+    fig.savefig(
+        buffer,
+        format=format,
+        dpi=dpi,
+        bbox_inches="tight",
+        facecolor="white",
+        edgecolor="none",
+    )
     buffer.seek(0)
 
     img_base64 = base64.b64encode(buffer.read()).decode("utf-8")
@@ -53,10 +56,7 @@ def fig_to_base64(
     return f"data:{mime_type};base64,{img_base64}"
 
 
-def create_figure(
-    figsize: tuple = (10, 6),
-    style: Optional[str] = None
-) -> tuple:
+def create_figure(figsize: tuple = (10, 6), style: Optional[str] = None) -> tuple:
     """
     Create a matplotlib figure with consistent styling.
 

@@ -45,7 +45,7 @@ class FactorOptimizer:
         self,
         price_data: pd.DataFrame,
         factor_data: pd.DataFrame,
-        risk_free_rate: float = 0.02
+        risk_free_rate: float = 0.02,
     ):
         self.price_data = price_data
         self.tickers = list(price_data.columns)
@@ -64,7 +64,7 @@ class FactorOptimizer:
         self.factor_data = factor_data.loc[common_dates]
 
         # Calculate excess returns for each asset
-        self.excess_returns = self.returns.sub(self.factor_data['RF'], axis=0)
+        self.excess_returns = self.returns.sub(self.factor_data["RF"], axis=0)
 
         # Pre-compute individual asset betas for all factors
         self._asset_betas = self._compute_asset_betas()
@@ -75,8 +75,11 @@ class FactorOptimizer:
 
     def _compute_asset_betas(self) -> pd.DataFrame:
         """Compute factor betas for each individual asset."""
-        factors = [f for f in ['Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA', 'MOM']
-                   if f in self.factor_data.columns]
+        factors = [
+            f
+            for f in ["Mkt-RF", "SMB", "HML", "RMW", "CMA", "MOM"]
+            if f in self.factor_data.columns
+        ]
 
         betas = {}
         for ticker in self.tickers:
@@ -117,7 +120,7 @@ class FactorOptimizer:
         self,
         target_betas: Dict[str, float],
         weight_bounds: Tuple[float, float] = (0, 1),
-        tolerance: float = 0.1
+        tolerance: float = 0.1,
     ) -> Dict:
         """
         Optimize portfolio to achieve target factor exposures.
@@ -141,8 +144,10 @@ class FactorOptimizer:
         # Validate factors exist
         for factor in target_betas:
             if factor not in self._asset_betas.columns:
-                raise ValueError(f"Factor '{factor}' not available. "
-                                 f"Available: {self._asset_betas.columns.tolist()}")
+                raise ValueError(
+                    f"Factor '{factor}' not available. "
+                    f"Available: {self._asset_betas.columns.tolist()}"
+                )
 
         def objective(weights):
             # Maximize Sharpe (minimize negative Sharpe)
@@ -153,14 +158,16 @@ class FactorOptimizer:
             achieved = np.dot(weights, self._asset_betas[factor])
             return tolerance - abs(achieved - target)
 
-        constraints = [{'type': 'eq', 'fun': lambda x: np.sum(x) - 1}]
+        constraints = [{"type": "eq", "fun": lambda x: np.sum(x) - 1}]
 
         # Add beta constraints
         for factor, target in target_betas.items():
-            constraints.append({
-                'type': 'ineq',
-                'fun': lambda x, f=factor, t=target: beta_constraint(x, f, t)
-            })
+            constraints.append(
+                {
+                    "type": "ineq",
+                    "fun": lambda x, f=factor, t=target: beta_constraint(x, f, t),
+                }
+            )
 
         bounds = tuple(weight_bounds for _ in range(self.n_assets))
         initial_weights = np.array([1 / self.n_assets] * self.n_assets)
@@ -168,29 +175,29 @@ class FactorOptimizer:
         result = minimize(
             objective,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
             constraints=constraints,
-            options={'maxiter': 500}
+            options={"maxiter": 500},
         )
 
         optimal_weights = result.x
 
         return {
-            'weights': dict(zip(self.tickers, optimal_weights)),
-            'achieved_betas': self._portfolio_betas(optimal_weights),
-            'target_betas': target_betas,
-            'return': self._portfolio_return(optimal_weights),
-            'volatility': self._portfolio_volatility(optimal_weights),
-            'sharpe_ratio': self._portfolio_sharpe(optimal_weights),
-            'success': result.success
+            "weights": dict(zip(self.tickers, optimal_weights)),
+            "achieved_betas": self._portfolio_betas(optimal_weights),
+            "target_betas": target_betas,
+            "return": self._portfolio_return(optimal_weights),
+            "volatility": self._portfolio_volatility(optimal_weights),
+            "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
+            "success": result.success,
         }
 
     def optimize_factor_neutral(
         self,
         factors: List[str],
         weight_bounds: Tuple[float, float] = (0, 1),
-        tolerance: float = 0.05
+        tolerance: float = 0.05,
     ) -> Dict:
         """
         Optimize portfolio to be neutral to specified factors.
@@ -222,13 +229,12 @@ class FactorOptimizer:
             beta = np.dot(weights, self._asset_betas[factor])
             return tolerance - abs(beta)
 
-        constraints = [{'type': 'eq', 'fun': lambda x: np.sum(x) - 1}]
+        constraints = [{"type": "eq", "fun": lambda x: np.sum(x) - 1}]
 
         for factor in factors:
-            constraints.append({
-                'type': 'ineq',
-                'fun': lambda x, f=factor: neutrality_constraint(x, f)
-            })
+            constraints.append(
+                {"type": "ineq", "fun": lambda x, f=factor: neutrality_constraint(x, f)}
+            )
 
         bounds = tuple(weight_bounds for _ in range(self.n_assets))
         initial_weights = np.array([1 / self.n_assets] * self.n_assets)
@@ -236,28 +242,28 @@ class FactorOptimizer:
         result = minimize(
             objective,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
             constraints=constraints,
-            options={'maxiter': 500}
+            options={"maxiter": 500},
         )
 
         optimal_weights = result.x
 
         return {
-            'weights': dict(zip(self.tickers, optimal_weights)),
-            'achieved_betas': self._portfolio_betas(optimal_weights),
-            'neutralized_factors': factors,
-            'return': self._portfolio_return(optimal_weights),
-            'volatility': self._portfolio_volatility(optimal_weights),
-            'sharpe_ratio': self._portfolio_sharpe(optimal_weights),
-            'success': result.success
+            "weights": dict(zip(self.tickers, optimal_weights)),
+            "achieved_betas": self._portfolio_betas(optimal_weights),
+            "neutralized_factors": factors,
+            "return": self._portfolio_return(optimal_weights),
+            "volatility": self._portfolio_volatility(optimal_weights),
+            "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
+            "success": result.success,
         }
 
     def optimize_max_alpha(
         self,
-        model: Union[str, FactorModel] = 'ff3',
-        weight_bounds: Tuple[float, float] = (0, 1)
+        model: Union[str, FactorModel] = "ff3",
+        weight_bounds: Tuple[float, float] = (0, 1),
     ) -> Dict:
         """
         Optimize portfolio to maximize expected alpha.
@@ -279,11 +285,11 @@ class FactorOptimizer:
         # Get model factors
         if isinstance(model, str):
             model_factors = {
-                'capm': ['Mkt-RF'],
-                'ff3': ['Mkt-RF', 'SMB', 'HML'],
-                'ff5': ['Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA'],
-                'carhart': ['Mkt-RF', 'SMB', 'HML', 'MOM']
-            }.get(model.lower(), ['Mkt-RF', 'SMB', 'HML'])
+                "capm": ["Mkt-RF"],
+                "ff3": ["Mkt-RF", "SMB", "HML"],
+                "ff5": ["Mkt-RF", "SMB", "HML", "RMW", "CMA"],
+                "carhart": ["Mkt-RF", "SMB", "HML", "MOM"],
+            }.get(model.lower(), ["Mkt-RF", "SMB", "HML"])
         else:
             model_factors = model.value
 
@@ -304,36 +310,36 @@ class FactorOptimizer:
             # Negative alpha (minimize)
             return -np.dot(weights, alphas)
 
-        constraints = [{'type': 'eq', 'fun': lambda x: np.sum(x) - 1}]
+        constraints = [{"type": "eq", "fun": lambda x: np.sum(x) - 1}]
         bounds = tuple(weight_bounds for _ in range(self.n_assets))
         initial_weights = np.array([1 / self.n_assets] * self.n_assets)
 
         result = minimize(
             objective,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
 
         optimal_weights = result.x
 
         return {
-            'weights': dict(zip(self.tickers, optimal_weights)),
-            'expected_alpha': float(np.dot(optimal_weights, alphas)),
-            'asset_alphas': dict(zip(self.tickers, alphas)),
-            'achieved_betas': self._portfolio_betas(optimal_weights),
-            'return': self._portfolio_return(optimal_weights),
-            'volatility': self._portfolio_volatility(optimal_weights),
-            'sharpe_ratio': self._portfolio_sharpe(optimal_weights),
-            'success': result.success
+            "weights": dict(zip(self.tickers, optimal_weights)),
+            "expected_alpha": float(np.dot(optimal_weights, alphas)),
+            "asset_alphas": dict(zip(self.tickers, alphas)),
+            "achieved_betas": self._portfolio_betas(optimal_weights),
+            "return": self._portfolio_return(optimal_weights),
+            "volatility": self._portfolio_volatility(optimal_weights),
+            "sharpe_ratio": self._portfolio_sharpe(optimal_weights),
+            "success": result.success,
         }
 
     def generate_factor_frontier(
         self,
         factor: str,
         n_points: int = 20,
-        weight_bounds: Tuple[float, float] = (0, 1)
+        weight_bounds: Tuple[float, float] = (0, 1),
     ) -> pd.DataFrame:
         """
         Generate efficient frontier varying one factor's exposure.
@@ -368,15 +374,17 @@ class FactorOptimizer:
                 result = self.optimize_target_exposures(
                     target_betas={factor: target},
                     weight_bounds=weight_bounds,
-                    tolerance=0.05
+                    tolerance=0.05,
                 )
-                if result['success']:
-                    frontier.append({
-                        f'{factor}_beta': result['achieved_betas'][factor],
-                        'return': result['return'],
-                        'volatility': result['volatility'],
-                        'sharpe_ratio': result['sharpe_ratio']
-                    })
+                if result["success"]:
+                    frontier.append(
+                        {
+                            f"{factor}_beta": result["achieved_betas"][factor],
+                            "return": result["return"],
+                            "volatility": result["volatility"],
+                            "sharpe_ratio": result["sharpe_ratio"],
+                        }
+                    )
             except Exception:
                 continue
 
@@ -411,5 +419,5 @@ class FactorOptimizer:
         beta_str = self._asset_betas.to_string()
         lines.append(beta_str)
 
-        lines.append('=' * 60)
-        return '\n'.join(lines)
+        lines.append("=" * 60)
+        return "\n".join(lines)

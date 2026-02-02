@@ -33,9 +33,9 @@ class PortfolioVisualization:
         """
         cumulative_returns = (1 + data.pct_change()).cumprod()
         cumulative_returns.plot(figsize=figsize)
-        plt.title('Cumulative Returns by Asset')
-        plt.xlabel('Date')
-        plt.ylabel('Cumulative Returns')
+        plt.title("Cumulative Returns by Asset")
+        plt.xlabel("Date")
+        plt.ylabel("Cumulative Returns")
         plt.grid(True, alpha=0.3)
         plt.legend()
         plt.tight_layout()
@@ -43,9 +43,7 @@ class PortfolioVisualization:
 
     @staticmethod
     def plot_portfolio_return(
-        data: pd.DataFrame,
-        weights: List[float],
-        figsize: tuple = (10, 6)
+        data: pd.DataFrame, weights: List[float], figsize: tuple = (10, 6)
     ) -> None:
         """
         Plot cumulative portfolio return.
@@ -64,19 +62,17 @@ class PortfolioVisualization:
         cumulative_portfolio_returns = (1 + weighted_returns).cumprod()
 
         plt.figure(figsize=figsize)
-        plt.plot(cumulative_portfolio_returns, linewidth=2, color='blue')
-        plt.title('Portfolio Cumulative Return')
-        plt.xlabel('Date')
-        plt.ylabel('Growth of $1')
+        plt.plot(cumulative_portfolio_returns, linewidth=2, color="blue")
+        plt.title("Portfolio Cumulative Return")
+        plt.xlabel("Date")
+        plt.ylabel("Growth of $1")
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         plt.show()
 
     @staticmethod
     def plot_allocation_pie(
-        weights: List[float],
-        tickers: List[str],
-        figsize: tuple = (8, 8)
+        weights: List[float], tickers: List[str], figsize: tuple = (8, 8)
     ) -> None:
         """
         Plot portfolio allocation as a pie chart.
@@ -98,20 +94,18 @@ class PortfolioVisualization:
         plt.pie(
             sizes,
             labels=labels,
-            autopct='%1.1f%%',
+            autopct="%1.1f%%",
             startangle=90,
-            colors=plt.cm.Paired.colors
+            colors=plt.cm.Paired.colors,
         )
-        plt.title('Portfolio Allocation')
-        plt.axis('equal')
+        plt.title("Portfolio Allocation")
+        plt.axis("equal")
         plt.tight_layout()
         plt.show()
 
     @staticmethod
     def plot_drawdown(
-        data: pd.DataFrame,
-        weights: List[float],
-        figsize: tuple = (12, 6)
+        data: pd.DataFrame, weights: List[float], figsize: tuple = (12, 6)
     ) -> None:
         """
         Plot portfolio drawdown over time.
@@ -132,11 +126,13 @@ class PortfolioVisualization:
         drawdown = (cumulative / peak) - 1
 
         plt.figure(figsize=figsize)
-        plt.fill_between(drawdown.index, drawdown.values * 100, 0, alpha=0.5, color='red')
-        plt.plot(drawdown.index, drawdown.values * 100, color='darkred', linewidth=1)
-        plt.title('Portfolio Drawdown')
-        plt.xlabel('Date')
-        plt.ylabel('Drawdown (%)')
+        plt.fill_between(
+            drawdown.index, drawdown.values * 100, 0, alpha=0.5, color="red"
+        )
+        plt.plot(drawdown.index, drawdown.values * 100, color="darkred", linewidth=1)
+        plt.title("Portfolio Drawdown")
+        plt.xlabel("Date")
+        plt.ylabel("Drawdown (%)")
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         plt.show()
@@ -146,7 +142,7 @@ class PortfolioVisualization:
         data: pd.DataFrame,
         weights: List[float],
         window: int = 21,
-        figsize: tuple = (12, 6)
+        figsize: tuple = (12, 6),
     ) -> None:
         """
         Plot rolling portfolio volatility.
@@ -167,10 +163,12 @@ class PortfolioVisualization:
         rolling_vol = weighted_returns.rolling(window=window).std() * np.sqrt(252)
 
         plt.figure(figsize=figsize)
-        plt.plot(rolling_vol.index, rolling_vol.values * 100, linewidth=1.5, color='blue')
-        plt.title(f'{window}-Day Rolling Volatility (Annualized)')
-        plt.xlabel('Date')
-        plt.ylabel('Volatility (%)')
+        plt.plot(
+            rolling_vol.index, rolling_vol.values * 100, linewidth=1.5, color="blue"
+        )
+        plt.title(f"{window}-Day Rolling Volatility (Annualized)")
+        plt.xlabel("Date")
+        plt.ylabel("Volatility (%)")
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         plt.show()
@@ -180,7 +178,7 @@ class PortfolioVisualization:
         data: pd.DataFrame,
         weights: List[float],
         bins: int = 50,
-        figsize: tuple = (10, 6)
+        figsize: tuple = (10, 6),
     ) -> None:
         """
         Plot histogram of portfolio returns.
@@ -200,18 +198,18 @@ class PortfolioVisualization:
         weighted_returns = returns.dot(weights)
 
         plt.figure(figsize=figsize)
-        plt.hist(weighted_returns * 100, bins=bins, edgecolor='black', alpha=0.7)
-        plt.axvline(x=0, color='red', linestyle='--', linewidth=1)
+        plt.hist(weighted_returns * 100, bins=bins, edgecolor="black", alpha=0.7)
+        plt.axvline(x=0, color="red", linestyle="--", linewidth=1)
         plt.axvline(
             x=weighted_returns.mean() * 100,
-            color='green',
-            linestyle='--',
+            color="green",
+            linestyle="--",
             linewidth=2,
-            label=f'Mean: {weighted_returns.mean()*100:.2f}%'
+            label=f"Mean: {weighted_returns.mean()*100:.2f}%",
         )
-        plt.title('Daily Returns Distribution')
-        plt.xlabel('Daily Return (%)')
-        plt.ylabel('Frequency')
+        plt.title("Daily Returns Distribution")
+        plt.xlabel("Daily Return (%)")
+        plt.ylabel("Frequency")
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.tight_layout()

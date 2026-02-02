@@ -43,7 +43,7 @@ class FactorAttribution:
         self,
         returns: pd.Series,
         factor_data: pd.DataFrame,
-        annualization_factor: Optional[int] = None
+        annualization_factor: Optional[int] = None,
     ):
         self.raw_returns = returns
         self.raw_factor_data = factor_data
@@ -66,13 +66,10 @@ class FactorAttribution:
         self.annualization_factor = annualization_factor
 
         # Create regression object for analysis
-        self._regression = FactorRegression(
-            returns, factor_data, annualization_factor
-        )
+        self._regression = FactorRegression(returns, factor_data, annualization_factor)
 
     def decompose_returns(
-        self,
-        model: Union[str, FactorModel] = 'ff3'
+        self, model: Union[str, FactorModel] = "ff3"
     ) -> Dict[str, float]:
         """
         Decompose total returns into factor contributions.
@@ -96,30 +93,36 @@ class FactorAttribution:
         factors = reg_results.factors
 
         # Calculate average factor returns (annualized)
-        avg_factor_returns = self.factor_data[factors].mean() * self.annualization_factor
+        avg_factor_returns = (
+            self.factor_data[factors].mean() * self.annualization_factor
+        )
 
         # Risk-free rate contribution
-        rf_return = self.factor_data['RF'].mean() * self.annualization_factor
+        rf_return = self.factor_data["RF"].mean() * self.annualization_factor
 
         # Total return
-        total_return = self.raw_returns.loc[self.excess_returns.index].mean() * self.annualization_factor
+        total_return = (
+            self.raw_returns.loc[self.excess_returns.index].mean()
+            * self.annualization_factor
+        )
 
         # Factor contributions = beta * average factor return
         contributions = {}
-        contributions['total'] = total_return
-        contributions['risk_free'] = rf_return
+        contributions["total"] = total_return
+        contributions["risk_free"] = rf_return
 
         for factor in factors:
-            contributions[factor] = reg_results.betas[factor] * avg_factor_returns[factor]
+            contributions[factor] = (
+                reg_results.betas[factor] * avg_factor_returns[factor]
+            )
 
         # Alpha is the residual
-        contributions['alpha'] = reg_results.alpha
+        contributions["alpha"] = reg_results.alpha
 
         return contributions
 
     def decompose_risk(
-        self,
-        model: Union[str, FactorModel] = 'ff3'
+        self, model: Union[str, FactorModel] = "ff3"
     ) -> Dict[str, float]:
         """
         Decompose portfolio variance into factor contributions.
@@ -153,7 +156,7 @@ class FactorAttribution:
         systematic_variance = betas @ factor_cov.values @ betas
 
         # Individual factor contributions (marginal)
-        contributions = {'total': total_variance}
+        contributions = {"total": total_variance}
 
         for i, factor in enumerate(factors):
             # Factor contribution = beta_i^2 * var(factor_i)
@@ -161,15 +164,13 @@ class FactorAttribution:
             contributions[factor] = reg_results.betas[factor] ** 2 * factor_var
 
         # Idiosyncratic variance
-        contributions['idiosyncratic'] = total_variance - systematic_variance
-        contributions['r_squared'] = reg_results.r_squared
+        contributions["idiosyncratic"] = total_variance - systematic_variance
+        contributions["r_squared"] = reg_results.r_squared
 
         return contributions
 
     def get_rolling_attribution(
-        self,
-        model: Union[str, FactorModel] = 'ff3',
-        window: int = 60
+        self, model: Union[str, FactorModel] = "ff3", window: int = 60
     ) -> pd.DataFrame:
         """
         Calculate rolling return attribution over time.
@@ -189,10 +190,10 @@ class FactorAttribution:
         # Get factors for the model
         if isinstance(model, str):
             model_enum = {
-                'capm': FactorModel.CAPM,
-                'ff3': FactorModel.FF3,
-                'ff5': FactorModel.FF5,
-                'carhart': FactorModel.CARHART
+                "capm": FactorModel.CAPM,
+                "ff3": FactorModel.FF3,
+                "ff5": FactorModel.FF5,
+                "carhart": FactorModel.CARHART,
             }.get(model.lower())
             factors = model_enum.value if model_enum else FactorModel.FF3.value
         else:
@@ -207,29 +208,28 @@ class FactorAttribution:
             # Get window data
             loc = self.factor_data.index.get_loc(date)
             start_loc = max(0, loc - window + 1)
-            factor_window = self.factor_data.iloc[start_loc:loc + 1]
+            factor_window = self.factor_data.iloc[start_loc : loc + 1]
 
             # Average factor returns (annualized)
             avg_returns = factor_window[factors].mean() * self.annualization_factor
 
             # Contributions
-            row = {'date': date}
+            row = {"date": date}
             for factor in factors:
                 beta = rolling_betas.loc[date, factor]
-                row[f'{factor}_contrib'] = beta * avg_returns[factor]
-            row['alpha'] = rolling_betas.loc[date, 'alpha']
+                row[f"{factor}_contrib"] = beta * avg_returns[factor]
+            row["alpha"] = rolling_betas.loc[date, "alpha"]
 
             results.append(row)
 
         df = pd.DataFrame(results)
-        if 'date' in df.columns:
-            df = df.set_index('date')
+        if "date" in df.columns:
+            df = df.set_index("date")
 
         return df
 
     def get_attribution_summary(
-        self,
-        model: Union[str, FactorModel] = 'ff3'
+        self, model: Union[str, FactorModel] = "ff3"
     ) -> pd.DataFrame:
         """
         Get a summary table of return and risk attribution.
@@ -251,42 +251,50 @@ class FactorAttribution:
         rows = []
 
         # Total
-        rows.append({
-            'Component': 'Total',
-            'Return (%)': return_decomp['total'] * 100,
-            'Variance': risk_decomp['total'],
-            'Std Dev (%)': np.sqrt(risk_decomp['total']) * 100,
-        })
+        rows.append(
+            {
+                "Component": "Total",
+                "Return (%)": return_decomp["total"] * 100,
+                "Variance": risk_decomp["total"],
+                "Std Dev (%)": np.sqrt(risk_decomp["total"]) * 100,
+            }
+        )
 
         # Risk-free
-        rows.append({
-            'Component': 'Risk-Free',
-            'Return (%)': return_decomp['risk_free'] * 100,
-            'Variance': 0,
-            'Std Dev (%)': 0,
-        })
+        rows.append(
+            {
+                "Component": "Risk-Free",
+                "Return (%)": return_decomp["risk_free"] * 100,
+                "Variance": 0,
+                "Std Dev (%)": 0,
+            }
+        )
 
         # Factors
         reg_results = self._regression.run_regression(model)
         for factor in reg_results.factors:
-            rows.append({
-                'Component': factor,
-                'Return (%)': return_decomp[factor] * 100,
-                'Variance': risk_decomp.get(factor, 0),
-                'Std Dev (%)': np.sqrt(risk_decomp.get(factor, 0)) * 100,
-            })
+            rows.append(
+                {
+                    "Component": factor,
+                    "Return (%)": return_decomp[factor] * 100,
+                    "Variance": risk_decomp.get(factor, 0),
+                    "Std Dev (%)": np.sqrt(risk_decomp.get(factor, 0)) * 100,
+                }
+            )
 
         # Alpha / Idiosyncratic
-        rows.append({
-            'Component': 'Alpha (Idiosyncratic)',
-            'Return (%)': return_decomp['alpha'] * 100,
-            'Variance': risk_decomp['idiosyncratic'],
-            'Std Dev (%)': np.sqrt(max(0, risk_decomp['idiosyncratic'])) * 100,
-        })
+        rows.append(
+            {
+                "Component": "Alpha (Idiosyncratic)",
+                "Return (%)": return_decomp["alpha"] * 100,
+                "Variance": risk_decomp["idiosyncratic"],
+                "Std Dev (%)": np.sqrt(max(0, risk_decomp["idiosyncratic"])) * 100,
+            }
+        )
 
         return pd.DataFrame(rows)
 
-    def summary(self, model: Union[str, FactorModel] = 'ff3') -> str:
+    def summary(self, model: Union[str, FactorModel] = "ff3") -> str:
         """Generate a text summary of factor attribution."""
         return_decomp = self.decompose_returns(model)
         risk_decomp = self.decompose_risk(model)
@@ -312,22 +320,28 @@ class FactorAttribution:
             lines.append(f"{factor:<20} {return_decomp[factor]*100:>11.2f}%")
         lines.append(f"{'Alpha':<20} {return_decomp['alpha']*100:>11.2f}%")
 
-        lines.extend([
-            "",
-            "RISK ATTRIBUTION",
-            f"{'-' * 40}",
-            f"{'Component':<20} {'Variance':>12} {'% of Total':>12}",
-            f"{'-' * 40}",
-        ])
+        lines.extend(
+            [
+                "",
+                "RISK ATTRIBUTION",
+                f"{'-' * 40}",
+                f"{'Component':<20} {'Variance':>12} {'% of Total':>12}",
+                f"{'-' * 40}",
+            ]
+        )
 
-        total_var = risk_decomp['total']
+        total_var = risk_decomp["total"]
         for factor in reg_results.factors:
             pct = risk_decomp[factor] / total_var * 100 if total_var > 0 else 0
             lines.append(f"{factor:<20} {risk_decomp[factor]:>12.6f} {pct:>11.1f}%")
 
-        idio_pct = risk_decomp['idiosyncratic'] / total_var * 100 if total_var > 0 else 0
-        lines.append(f"{'Idiosyncratic':<20} {risk_decomp['idiosyncratic']:>12.6f} {idio_pct:>11.1f}%")
+        idio_pct = (
+            risk_decomp["idiosyncratic"] / total_var * 100 if total_var > 0 else 0
+        )
+        lines.append(
+            f"{'Idiosyncratic':<20} {risk_decomp['idiosyncratic']:>12.6f} {idio_pct:>11.1f}%"
+        )
         lines.append(f"\nR-squared: {risk_decomp['r_squared']:.4f}")
-        lines.append('=' * 60)
+        lines.append("=" * 60)
 
-        return '\n'.join(lines)
+        return "\n".join(lines)

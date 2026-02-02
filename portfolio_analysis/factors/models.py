@@ -22,10 +22,11 @@ class FactorModel(Enum):
     FF5 : Fama-French 5-factor model (+ RMW, CMA)
     CARHART : Carhart 4-factor model (FF3 + MOM)
     """
-    CAPM = ['Mkt-RF']
-    FF3 = ['Mkt-RF', 'SMB', 'HML']
-    FF5 = ['Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA']
-    CARHART = ['Mkt-RF', 'SMB', 'HML', 'MOM']
+
+    CAPM = ["Mkt-RF"]
+    FF3 = ["Mkt-RF", "SMB", "HML"]
+    FF5 = ["Mkt-RF", "SMB", "HML", "RMW", "CMA"]
+    CARHART = ["Mkt-RF", "SMB", "HML", "MOM"]
 
 
 @dataclass
@@ -58,6 +59,7 @@ class RegressionResults:
     factors : list
         Factor names used in the model
     """
+
     alpha: float
     alpha_pvalue: float
     betas: Dict[str, float]
@@ -89,12 +91,13 @@ class RegressionResults:
                 f"{factor:<12} {self.betas[factor]:>10.3f} "
                 f"{self.beta_tstats[factor]:>10.2f} {self.beta_pvalues[factor]:>10.4f}"
             )
-        lines.append('=' * 60)
-        return '\n'.join(lines)
+        lines.append("=" * 60)
+        return "\n".join(lines)
 
     def _alpha_tstat(self) -> float:
         """Approximate t-stat for alpha from p-value."""
         from scipy import stats
+
         if self.alpha_pvalue >= 1.0:
             return 0.0
         if self.alpha_pvalue <= 0.0:
@@ -137,7 +140,7 @@ class FactorRegression:
         self,
         returns: pd.Series,
         factor_data: pd.DataFrame,
-        annualization_factor: Optional[int] = None
+        annualization_factor: Optional[int] = None,
     ):
         self.raw_returns = returns
         self.raw_factor_data = factor_data
@@ -167,23 +170,21 @@ class FactorRegression:
         """Get factor names for a model."""
         if isinstance(model, str):
             model = model.lower()
-            if model == 'capm':
+            if model == "capm":
                 return FactorModel.CAPM.value
-            elif model == 'ff3':
+            elif model == "ff3":
                 return FactorModel.FF3.value
-            elif model == 'ff5':
+            elif model == "ff5":
                 return FactorModel.FF5.value
-            elif model == 'carhart':
+            elif model == "carhart":
                 return FactorModel.CARHART.value
             else:
-                raise ValueError(f"Unknown model: {model}. Use 'capm', 'ff3', 'ff5', or 'carhart'")
+                raise ValueError(
+                    f"Unknown model: {model}. Use 'capm', 'ff3', 'ff5', or 'carhart'"
+                )
         return model.value
 
-    def _ols_regression(
-        self,
-        y: np.ndarray,
-        X: np.ndarray
-    ) -> tuple:
+    def _ols_regression(self, y: np.ndarray, X: np.ndarray) -> tuple:
         """
         Run OLS regression with statistical inference.
 
@@ -229,18 +230,17 @@ class FactorRegression:
         adj_r_squared = 1 - (1 - r_squared) * (n - 1) / dof
 
         return {
-            'coeffs': coeffs,
-            't_stats': t_stats,
-            'p_values': p_values,
-            'r_squared': r_squared,
-            'adj_r_squared': adj_r_squared,
-            'residual_std': residual_std,
-            'n': n
+            "coeffs": coeffs,
+            "t_stats": t_stats,
+            "p_values": p_values,
+            "r_squared": r_squared,
+            "adj_r_squared": adj_r_squared,
+            "residual_std": residual_std,
+            "n": n,
         }
 
     def run_regression(
-        self,
-        model: Union[str, FactorModel] = 'ff3'
+        self, model: Union[str, FactorModel] = "ff3"
     ) -> RegressionResults:
         """
         Run a factor regression.
@@ -260,7 +260,9 @@ class FactorRegression:
         # Validate factors exist in data
         missing = [f for f in factors if f not in self.factor_data.columns]
         if missing:
-            raise ValueError(f"Factors not in data: {missing}. Available: {self.factor_data.columns.tolist()}")
+            raise ValueError(
+                f"Factors not in data: {missing}. Available: {self.factor_data.columns.tolist()}"
+            )
 
         # Prepare data
         y = self.excess_returns.values
@@ -270,35 +272,35 @@ class FactorRegression:
         results = self._ols_regression(y, X)
 
         # Extract results
-        alpha = results['coeffs'][0]
-        betas = dict(zip(factors, results['coeffs'][1:]))
-        beta_tstats = dict(zip(factors, results['t_stats'][1:]))
-        beta_pvalues = dict(zip(factors, results['p_values'][1:]))
+        alpha = results["coeffs"][0]
+        betas = dict(zip(factors, results["coeffs"][1:]))
+        beta_tstats = dict(zip(factors, results["t_stats"][1:]))
+        beta_pvalues = dict(zip(factors, results["p_values"][1:]))
 
         # Annualize alpha and residual std
         alpha_annual = alpha * self.annualization_factor
-        residual_std_annual = results['residual_std'] * np.sqrt(self.annualization_factor)
+        residual_std_annual = results["residual_std"] * np.sqrt(
+            self.annualization_factor
+        )
 
         model_name = model.name if isinstance(model, FactorModel) else model.upper()
 
         return RegressionResults(
             alpha=alpha_annual,
-            alpha_pvalue=results['p_values'][0],
+            alpha_pvalue=results["p_values"][0],
             betas=betas,
             beta_pvalues=beta_pvalues,
             beta_tstats=beta_tstats,
-            r_squared=results['r_squared'],
-            adj_r_squared=results['adj_r_squared'],
+            r_squared=results["r_squared"],
+            adj_r_squared=results["adj_r_squared"],
             residual_std=residual_std_annual,
-            n_observations=results['n'],
+            n_observations=results["n"],
             model=model_name,
-            factors=factors
+            factors=factors,
         )
 
     def run_rolling_regression(
-        self,
-        model: Union[str, FactorModel] = 'ff3',
-        window: int = 60
+        self, model: Union[str, FactorModel] = "ff3", window: int = 60
     ) -> pd.DataFrame:
         """
         Run rolling factor regressions.
@@ -323,15 +325,15 @@ class FactorRegression:
         dates = []
 
         for i in range(window, len(y) + 1):
-            y_window = y.iloc[i - window:i].values
-            X_window = X.iloc[i - window:i].values
+            y_window = y.iloc[i - window : i].values
+            X_window = X.iloc[i - window : i].values
 
             try:
                 reg = self._ols_regression(y_window, X_window)
-                result = {'alpha': reg['coeffs'][0] * self.annualization_factor}
+                result = {"alpha": reg["coeffs"][0] * self.annualization_factor}
                 for j, factor in enumerate(factors):
-                    result[factor] = reg['coeffs'][j + 1]
-                result['r_squared'] = reg['r_squared']
+                    result[factor] = reg["coeffs"][j + 1]
+                result["r_squared"] = reg["r_squared"]
                 results.append(result)
                 dates.append(y.index[i - 1])
             except Exception:
@@ -348,30 +350,30 @@ class FactorRegression:
         pd.DataFrame
             Comparison table with alpha, R-squared, and key betas for each model
         """
-        models = ['capm', 'ff3']
+        models = ["capm", "ff3"]
 
         # Add ff5 if factors available
         if all(f in self.factor_data.columns for f in FactorModel.FF5.value):
-            models.append('ff5')
+            models.append("ff5")
 
         # Add carhart if momentum available
-        if 'MOM' in self.factor_data.columns:
-            models.append('carhart')
+        if "MOM" in self.factor_data.columns:
+            models.append("carhart")
 
         results = []
         for model in models:
             try:
                 reg = self.run_regression(model)
                 result = {
-                    'Model': reg.model,
-                    'Alpha (%)': reg.alpha * 100,
-                    'Alpha p-value': reg.alpha_pvalue,
-                    'R-squared': reg.r_squared,
-                    'Adj R-squared': reg.adj_r_squared,
-                    'Mkt Beta': reg.betas.get('Mkt-RF', np.nan),
+                    "Model": reg.model,
+                    "Alpha (%)": reg.alpha * 100,
+                    "Alpha p-value": reg.alpha_pvalue,
+                    "R-squared": reg.r_squared,
+                    "Adj R-squared": reg.adj_r_squared,
+                    "Mkt Beta": reg.betas.get("Mkt-RF", np.nan),
                 }
                 # Add other betas if available
-                for factor in ['SMB', 'HML', 'RMW', 'CMA', 'MOM']:
+                for factor in ["SMB", "HML", "RMW", "CMA", "MOM"]:
                     if factor in reg.betas:
                         result[factor] = reg.betas[factor]
                 results.append(result)

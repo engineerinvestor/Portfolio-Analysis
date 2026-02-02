@@ -29,10 +29,7 @@ class DrawdownSection(ReportSection):
     """
 
     def __init__(
-        self,
-        portfolio: PortfolioAnalysis,
-        template: Template,
-        top_n: int = 5
+        self, portfolio: PortfolioAnalysis, template: Template, top_n: int = 5
     ):
         super().__init__(template)
         self.portfolio = portfolio
@@ -81,18 +78,20 @@ class DrawdownSection(ReportSection):
                 recovery_date = None
                 recovery_days = None
 
-            periods.append({
-                "start": start.strftime("%Y-%m-%d"),
-                "trough": trough_date.strftime("%Y-%m-%d"),
-                "end": end.strftime("%Y-%m-%d") if recovery_date else "Ongoing",
-                "drawdown": trough_value * 100,
-                "days_to_trough": (trough_date - start).days,
-                "recovery_days": recovery_days,
-            })
+            periods.append(
+                {
+                    "start": start.strftime("%Y-%m-%d"),
+                    "trough": trough_date.strftime("%Y-%m-%d"),
+                    "end": end.strftime("%Y-%m-%d") if recovery_date else "Ongoing",
+                    "drawdown": trough_value * 100,
+                    "days_to_trough": (trough_date - start).days,
+                    "recovery_days": recovery_days,
+                }
+            )
 
         # Sort by drawdown magnitude and take top N
         periods.sort(key=lambda x: x["drawdown"])
-        return periods[:self.top_n]
+        return periods[: self.top_n]
 
     def _create_drawdown_chart(self) -> str:
         """Create underwater/drawdown chart and return as base64."""
@@ -100,10 +99,10 @@ class DrawdownSection(ReportSection):
 
         fig, ax = create_figure(figsize=(12, 4))
 
-        ax.fill_between(drawdown.index, drawdown.values * 100, 0,
-                        color="#d62728", alpha=0.6)
-        ax.plot(drawdown.index, drawdown.values * 100,
-                color="#8b0000", linewidth=0.8)
+        ax.fill_between(
+            drawdown.index, drawdown.values * 100, 0, color="#d62728", alpha=0.6
+        )
+        ax.plot(drawdown.index, drawdown.values * 100, color="#8b0000", linewidth=0.8)
 
         ax.axhline(y=0, color="gray", linestyle="-", linewidth=0.8)
 
