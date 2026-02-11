@@ -74,9 +74,7 @@ class FactorAttribution:
         # Create regression object for analysis
         self._regression = FactorRegression(returns, factor_data, annualization_factor)
 
-    def decompose_returns(
-        self, model: str | FactorModel = "ff3"
-    ) -> dict[str, float]:
+    def decompose_returns(self, model: str | FactorModel = "ff3") -> dict[str, float]:
         """
         Decompose total returns into factor contributions.
 
@@ -127,9 +125,7 @@ class FactorAttribution:
 
         return contributions
 
-    def decompose_risk(
-        self, model: str | FactorModel = "ff3"
-    ) -> dict[str, float]:
+    def decompose_risk(self, model: str | FactorModel = "ff3") -> dict[str, float]:
         """
         Decompose portfolio variance into factor contributions.
 
@@ -234,9 +230,7 @@ class FactorAttribution:
 
         return df
 
-    def get_attribution_summary(
-        self, model: str | FactorModel = "ff3"
-    ) -> pd.DataFrame:
+    def get_attribution_summary(self, model: str | FactorModel = "ff3") -> pd.DataFrame:
         """
         Get a summary table of return and risk attribution.
 
