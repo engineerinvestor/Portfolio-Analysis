@@ -14,7 +14,7 @@ class FactorDataLoader:
     Fetch Fama-French factor data from Kenneth French Data Library.
 
     Uses pandas-datareader to download factor data and provides local caching
-    to avoid repeated downloads.
+    to avoid repeated downloads. Supports US and international regional factors.
 
     Parameters
     ----------
@@ -27,15 +27,86 @@ class FactorDataLoader:
     >>> ff3 = loader.get_ff3_factors('2015-01-01', '2023-12-31')
     >>> print(ff3.columns.tolist())
     ['Mkt-RF', 'SMB', 'HML', 'RF']
+
+    >>> ff5_intl = loader.get_ff5_factors('2015-01-01', '2023-12-31',
+    ...                                   region='developed_ex_us')
     """
 
-    # French data library dataset names
+    # French data library dataset names (US — kept for backward compatibility)
     FF3_DAILY = "F-F_Research_Data_Factors_daily"
     FF3_MONTHLY = "F-F_Research_Data_Factors"
     FF5_DAILY = "F-F_Research_Data_5_Factors_2x3_daily"
     FF5_MONTHLY = "F-F_Research_Data_5_Factors_2x3"
     MOM_DAILY = "F-F_Momentum_Factor_daily"
     MOM_MONTHLY = "F-F_Momentum_Factor"
+
+    # Regional dataset names from Kenneth French Data Library
+    REGIONS = {
+        "us": {
+            "ff3_daily": "F-F_Research_Data_Factors_daily",
+            "ff3_monthly": "F-F_Research_Data_Factors",
+            "ff5_daily": "F-F_Research_Data_5_Factors_2x3_daily",
+            "ff5_monthly": "F-F_Research_Data_5_Factors_2x3",
+            "mom_daily": "F-F_Momentum_Factor_daily",
+            "mom_monthly": "F-F_Momentum_Factor",
+        },
+        "developed": {
+            "ff3_daily": "Developed_3_Factors_Daily",
+            "ff3_monthly": "Developed_3_Factors",
+            "ff5_daily": "Developed_5_Factors_Daily",
+            "ff5_monthly": "Developed_5_Factors",
+            "mom_daily": "Developed_Mom_Factor_Daily",
+            "mom_monthly": "Developed_Mom_Factor",
+        },
+        "developed_ex_us": {
+            "ff3_daily": "Developed_ex_US_3_Factors_Daily",
+            "ff3_monthly": "Developed_ex_US_3_Factors",
+            "ff5_daily": "Developed_ex_US_5_Factors_Daily",
+            "ff5_monthly": "Developed_ex_US_5_Factors",
+            "mom_daily": "Developed_ex_US_Mom_Factor_Daily",
+            "mom_monthly": "Developed_ex_US_Mom_Factor",
+        },
+        "emerging": {
+            "ff3_daily": None,
+            "ff3_monthly": None,
+            "ff5_daily": None,
+            "ff5_monthly": "Emerging_5_Factors",
+            "mom_daily": None,
+            "mom_monthly": "Emerging_MOM_Factor",
+        },
+        "europe": {
+            "ff3_daily": "Europe_3_Factors_Daily",
+            "ff3_monthly": "Europe_3_Factors",
+            "ff5_daily": "Europe_5_Factors_Daily",
+            "ff5_monthly": "Europe_5_Factors",
+            "mom_daily": "Europe_Mom_Factor_Daily",
+            "mom_monthly": "Europe_Mom_Factor",
+        },
+        "japan": {
+            "ff3_daily": "Japan_3_Factors_Daily",
+            "ff3_monthly": "Japan_3_Factors",
+            "ff5_daily": "Japan_5_Factors_Daily",
+            "ff5_monthly": "Japan_5_Factors",
+            "mom_daily": "Japan_Mom_Factor_Daily",
+            "mom_monthly": "Japan_Mom_Factor",
+        },
+        "asia_pacific_ex_japan": {
+            "ff3_daily": "Asia_Pacific_ex_Japan_3_Factors_Daily",
+            "ff3_monthly": "Asia_Pacific_ex_Japan_3_Factors",
+            "ff5_daily": "Asia_Pacific_ex_Japan_5_Factors_Daily",
+            "ff5_monthly": "Asia_Pacific_ex_Japan_5_Factors",
+            "mom_daily": "Asia_Pacific_ex_Japan_MOM_Factor_Daily",
+            "mom_monthly": "Asia_Pacific_ex_Japan_MOM_Factor",
+        },
+        "north_america": {
+            "ff3_daily": "North_America_3_Factors_Daily",
+            "ff3_monthly": "North_America_3_Factors",
+            "ff5_daily": "North_America_5_Factors_Daily",
+            "ff5_monthly": "North_America_5_Factors",
+            "mom_daily": "North_America_Mom_Factor_Daily",
+            "mom_monthly": "North_America_Mom_Factor",
+        },
+    }
 
     def __init__(self, cache_dir: Optional[str] = None):
         if cache_dir is None:
@@ -44,6 +115,64 @@ class FactorDataLoader:
             cache_dir = os.path.join(tempfile.gettempdir(), "ff_factors_cache")
         self.cache_dir = cache_dir
         os.makedirs(self.cache_dir, exist_ok=True)
+
+    @classmethod
+    def get_available_regions(cls) -> list:
+        """
+        Return list of supported region names.
+
+        Returns
+        -------
+        list of str
+            Supported region names for use with the ``region`` parameter.
+        """
+        return list(cls.REGIONS.keys())
+
+    def _get_dataset_name(self, model: str, frequency: str, region: str) -> str:
+        """
+        Look up the French library dataset name for a model/frequency/region.
+
+        Parameters
+        ----------
+        model : str
+            Factor model key: 'ff3', 'ff5', or 'mom'.
+        frequency : str
+            'daily' or 'monthly'.
+        region : str
+            Region name (must be a key in ``REGIONS``).
+
+        Returns
+        -------
+        str
+            Dataset name string for ``pandas_datareader``.
+
+        Raises
+        ------
+        ValueError
+            If the region is unknown or the requested combination is unavailable.
+        """
+        if region not in self.REGIONS:
+            available = ", ".join(sorted(self.REGIONS.keys()))
+            raise ValueError(
+                f"Unknown region '{region}'. " f"Available regions: {available}"
+            )
+
+        key = f"{model}_{frequency}"
+        region_datasets = self.REGIONS[region]
+
+        if key not in region_datasets:
+            raise ValueError(
+                f"Invalid model/frequency combination: '{model}' / '{frequency}'."
+            )
+
+        dataset = region_datasets[key]
+        if dataset is None:
+            raise ValueError(
+                f"Daily factor data is not available for region '{region}'. "
+                f"Use frequency='monthly'."
+            )
+
+        return dataset
 
     def _get_cache_path(self, dataset: str) -> str:
         """Generate cache file path for a dataset."""
@@ -142,6 +271,7 @@ class FactorDataLoader:
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
         frequency: str = "daily",
+        region: str = "us",
     ) -> pd.DataFrame:
         """
         Get Fama-French 3-factor data.
@@ -154,21 +284,21 @@ class FactorDataLoader:
             End date for data
         frequency : str, default 'daily'
             Data frequency: 'daily' or 'monthly'
+        region : str, default 'us'
+            Geographic region for factor data. Use
+            ``FactorDataLoader.get_available_regions()`` for the full list.
 
         Returns
         -------
         pd.DataFrame
             DataFrame with columns: Mkt-RF, SMB, HML, RF
         """
-        if frequency == "daily":
-            dataset = self.FF3_DAILY
-        elif frequency == "monthly":
-            dataset = self.FF3_MONTHLY
-        else:
+        if frequency not in ("daily", "monthly"):
             raise ValueError(
                 f"Frequency must be 'daily' or 'monthly', got: {frequency}"
             )
 
+        dataset = self._get_dataset_name("ff3", frequency, region)
         data = self._fetch_french_data(dataset)
         return self._filter_dates(data, start_date, end_date)
 
@@ -177,6 +307,7 @@ class FactorDataLoader:
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
         frequency: str = "daily",
+        region: str = "us",
     ) -> pd.DataFrame:
         """
         Get Fama-French 5-factor data.
@@ -189,21 +320,21 @@ class FactorDataLoader:
             End date for data
         frequency : str, default 'daily'
             Data frequency: 'daily' or 'monthly'
+        region : str, default 'us'
+            Geographic region for factor data. Use
+            ``FactorDataLoader.get_available_regions()`` for the full list.
 
         Returns
         -------
         pd.DataFrame
             DataFrame with columns: Mkt-RF, SMB, HML, RMW, CMA, RF
         """
-        if frequency == "daily":
-            dataset = self.FF5_DAILY
-        elif frequency == "monthly":
-            dataset = self.FF5_MONTHLY
-        else:
+        if frequency not in ("daily", "monthly"):
             raise ValueError(
                 f"Frequency must be 'daily' or 'monthly', got: {frequency}"
             )
 
+        dataset = self._get_dataset_name("ff5", frequency, region)
         data = self._fetch_french_data(dataset)
         return self._filter_dates(data, start_date, end_date)
 
@@ -212,6 +343,7 @@ class FactorDataLoader:
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
         frequency: str = "daily",
+        region: str = "us",
     ) -> pd.Series:
         """
         Get momentum factor data.
@@ -224,21 +356,21 @@ class FactorDataLoader:
             End date for data
         frequency : str, default 'daily'
             Data frequency: 'daily' or 'monthly'
+        region : str, default 'us'
+            Geographic region for factor data. Use
+            ``FactorDataLoader.get_available_regions()`` for the full list.
 
         Returns
         -------
         pd.Series
             Momentum factor (MOM or WML)
         """
-        if frequency == "daily":
-            dataset = self.MOM_DAILY
-        elif frequency == "monthly":
-            dataset = self.MOM_MONTHLY
-        else:
+        if frequency not in ("daily", "monthly"):
             raise ValueError(
                 f"Frequency must be 'daily' or 'monthly', got: {frequency}"
             )
 
+        dataset = self._get_dataset_name("mom", frequency, region)
         data = self._fetch_french_data(dataset)
         filtered = self._filter_dates(data, start_date, end_date)
 
@@ -255,6 +387,7 @@ class FactorDataLoader:
         start_date: Union[str, datetime],
         end_date: Union[str, datetime],
         frequency: str = "daily",
+        region: str = "us",
     ) -> pd.DataFrame:
         """
         Get Carhart 4-factor data (FF3 + Momentum).
@@ -267,14 +400,17 @@ class FactorDataLoader:
             End date for data
         frequency : str, default 'daily'
             Data frequency: 'daily' or 'monthly'
+        region : str, default 'us'
+            Geographic region for factor data. Use
+            ``FactorDataLoader.get_available_regions()`` for the full list.
 
         Returns
         -------
         pd.DataFrame
             DataFrame with columns: Mkt-RF, SMB, HML, MOM, RF
         """
-        ff3 = self.get_ff3_factors(start_date, end_date, frequency)
-        mom = self.get_momentum_factor(start_date, end_date, frequency)
+        ff3 = self.get_ff3_factors(start_date, end_date, frequency, region)
+        mom = self.get_momentum_factor(start_date, end_date, frequency, region)
 
         # Align dates
         common_dates = ff3.index.intersection(mom.index)

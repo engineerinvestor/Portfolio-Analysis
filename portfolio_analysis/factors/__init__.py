@@ -10,6 +10,10 @@ This module provides tools for:
 """
 
 from portfolio_analysis.factors.attribution import FactorAttribution
+from portfolio_analysis.factors.composite import (
+    CompositeFactorRegression,
+    CompositeRegressionResults,
+)
 from portfolio_analysis.factors.data import FactorDataLoader
 from portfolio_analysis.factors.exposures import FactorExposures
 from portfolio_analysis.factors.models import (
@@ -29,4 +33,6 @@ __all__ = [
     "FactorAttribution",
     "FactorOptimizer",
     "FactorVisualization",
+    "CompositeFactorRegression",
+    "CompositeRegressionResults",
 ]

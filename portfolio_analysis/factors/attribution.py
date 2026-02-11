@@ -2,13 +2,18 @@
 Factor-based return and risk attribution for portfolio analysis.
 """
 
-from typing import Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
 import pandas as pd
 
 from portfolio_analysis.factors.data import align_returns_with_factors
 from portfolio_analysis.factors.models import FactorModel, FactorRegression
+
+if TYPE_CHECKING:
+    from portfolio_analysis.factors.composite import CompositeRegressionResults
 
 
 class FactorAttribution:
@@ -294,6 +299,86 @@ class FactorAttribution:
         )
 
         return pd.DataFrame(rows)
+
+    @classmethod
+    def from_composite(
+        cls,
+        composite_results: CompositeRegressionResults,
+        returns_dict: dict[str, pd.Series],
+        factor_data_dict: dict[str, pd.DataFrame],
+    ) -> dict[str, float]:
+        """
+        Decompose composite portfolio returns into factor contributions.
+
+        Computes a weighted-average return attribution across all constituents,
+        each using its own regional factor data.
+
+        Parameters
+        ----------
+        composite_results : CompositeRegressionResults
+            Results from ``CompositeFactorRegression.run_composite_regression()``.
+        returns_dict : dict[str, pd.Series]
+            Per-ticker return series ({ticker: returns}).
+        factor_data_dict : dict[str, pd.DataFrame]
+            Per-region factor data ({region: factor_df}).
+
+        Returns
+        -------
+        dict[str, float]
+            Decomposition with keys: total, risk_free, each factor name, alpha.
+        """
+        total_weight = composite_results.coverage
+        if total_weight == 0:
+            raise ValueError("Composite results have zero coverage.")
+
+        scale = 1.0 / total_weight
+        contributions: dict[str, float] = {}
+
+        for ticker, result in composite_results.constituent_results.items():
+            weight = composite_results.portfolio_weights.get(ticker, 0)
+            region = composite_results.region_map.get(ticker, "us")
+            factor_data = factor_data_dict.get(region)
+
+            if factor_data is None or ticker not in returns_dict:
+                continue
+
+            ret = returns_dict[ticker]
+
+            # Detect annualization factor
+            if len(ret) > 1:
+                avg_days = (ret.index[-1] - ret.index[0]).days / len(ret)
+                ann_factor = 12 if avg_days > 20 else 252
+            else:
+                ann_factor = 252
+
+            # Average factor returns (annualized)
+            common = ret.index.intersection(factor_data.index)
+            if len(common) == 0:
+                continue
+            aligned_factors = factor_data.loc[common]
+
+            for factor in result.factors:
+                if factor in aligned_factors.columns:
+                    avg_ret = aligned_factors[factor].mean() * ann_factor
+                    contrib = result.betas[factor] * avg_ret * weight
+                    contributions[factor] = contributions.get(factor, 0) + contrib
+
+            # Risk-free
+            if "RF" in aligned_factors.columns:
+                rf = aligned_factors["RF"].mean() * ann_factor * weight
+                contributions["risk_free"] = contributions.get("risk_free", 0) + rf
+
+            # Total return
+            total_ret = ret.loc[common].mean() * ann_factor * weight
+            contributions["total"] = contributions.get("total", 0) + total_ret
+
+        # Scale all by coverage
+        contributions = {k: v * scale for k, v in contributions.items()}
+
+        # Alpha from composite results
+        contributions["alpha"] = composite_results.weighted_alpha
+
+        return contributions
 
     def summary(self, model: Union[str, FactorModel] = "ff3") -> str:
         """Generate a text summary of factor attribution."""

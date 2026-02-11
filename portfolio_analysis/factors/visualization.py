@@ -2,13 +2,18 @@
 Factor analysis visualization functionality.
 """
 
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from portfolio_analysis.factors.models import RegressionResults
+
+if TYPE_CHECKING:
+    from portfolio_analysis.factors.composite import CompositeRegressionResults
 
 
 class FactorVisualization:
@@ -499,5 +504,190 @@ class FactorVisualization:
             fontsize=14,
             y=1.02,
         )
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def plot_regional_comparison(
+        comparison_df: pd.DataFrame, figsize: tuple = (14, 5)
+    ) -> None:
+        """
+        Plot side-by-side R² and alpha comparison of US vs regional factors.
+
+        Parameters
+        ----------
+        comparison_df : pd.DataFrame
+            Output from ``CompositeFactorRegression.compare_us_vs_regional()``.
+            Expected columns: US R², Regional R², US Alpha (%), Regional Alpha (%).
+        figsize : tuple, default (14, 5)
+            Figure size.
+        """
+        if comparison_df.empty:
+            return
+
+        fig, axes = plt.subplots(1, 2, figsize=figsize)
+
+        tickers = comparison_df.index.tolist()
+        x = np.arange(len(tickers))
+        width = 0.35
+
+        # R² comparison
+        ax = axes[0]
+        ax.bar(
+            x - width / 2,
+            comparison_df["US R²"],
+            width,
+            label="US Factors",
+            color="#e74c3c",
+            edgecolor="black",
+            alpha=0.85,
+        )
+        ax.bar(
+            x + width / 2,
+            comparison_df["Regional R²"],
+            width,
+            label="Regional Factors",
+            color="#2ecc71",
+            edgecolor="black",
+            alpha=0.85,
+        )
+        ax.set_xticks(x)
+        ax.set_xticklabels(tickers, fontsize=11)
+        ax.set_ylabel("R²", fontsize=12)
+        ax.set_title("R² Improvement with Regional Factors", fontsize=13)
+        ax.legend(fontsize=10)
+        ax.set_ylim(0, 1.05)
+        ax.grid(True, alpha=0.3, axis="y")
+
+        # Alpha comparison
+        ax = axes[1]
+        ax.bar(
+            x - width / 2,
+            comparison_df["US Alpha (%)"],
+            width,
+            label="US Factors",
+            color="#e74c3c",
+            edgecolor="black",
+            alpha=0.85,
+        )
+        ax.bar(
+            x + width / 2,
+            comparison_df["Regional Alpha (%)"],
+            width,
+            label="Regional Factors",
+            color="#2ecc71",
+            edgecolor="black",
+            alpha=0.85,
+        )
+        ax.set_xticks(x)
+        ax.set_xticklabels(tickers, fontsize=11)
+        ax.set_ylabel("Alpha (% annualized)", fontsize=12)
+        ax.set_title("Alpha Estimate: US vs Regional Factors", fontsize=13)
+        ax.axhline(y=0, color="black", linewidth=0.5)
+        ax.legend(fontsize=10)
+        ax.grid(True, alpha=0.3, axis="y")
+
+        plt.suptitle(
+            "Impact of Using Regional Factor Data for International ETFs",
+            fontsize=14,
+            y=1.03,
+        )
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def plot_composite_exposures(
+        composite_results: CompositeRegressionResults,
+        baseline_results: Optional[RegressionResults] = None,
+        figsize: tuple = (12, 6),
+    ) -> None:
+        """
+        Plot composite weighted-average factor betas, optionally vs a baseline.
+
+        Parameters
+        ----------
+        composite_results : CompositeRegressionResults
+            Output from ``CompositeFactorRegression.run_composite_regression()``.
+        baseline_results : RegressionResults, optional
+            Single-region baseline (e.g. US-only regression) for comparison.
+        figsize : tuple, default (12, 6)
+            Figure size.
+        """
+        factors = list(composite_results.weighted_betas.keys())
+        composite_betas = [composite_results.weighted_betas[f] for f in factors]
+
+        x = np.arange(len(factors))
+        fig, ax = plt.subplots(figsize=figsize)
+
+        if baseline_results is not None:
+            width = 0.35
+            baseline_betas = [baseline_results.betas.get(f, 0) for f in factors]
+            ax.bar(
+                x - width / 2,
+                baseline_betas,
+                width,
+                label="Baseline (Single-Region)",
+                color="#3498db",
+                edgecolor="black",
+                alpha=0.85,
+            )
+            ax.bar(
+                x + width / 2,
+                composite_betas,
+                width,
+                label="Composite (Regional)",
+                color="#e67e22",
+                edgecolor="black",
+                alpha=0.85,
+            )
+            for i, (bl, co) in enumerate(zip(baseline_betas, composite_betas)):
+                ax.text(
+                    i - width / 2,
+                    bl + 0.01,
+                    f"{bl:.3f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                )
+                ax.text(
+                    i + width / 2,
+                    co + 0.01,
+                    f"{co:.3f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                )
+            ax.legend(fontsize=11, loc="upper right")
+        else:
+            bars = ax.bar(
+                x,
+                composite_betas,
+                color="#e67e22",
+                edgecolor="black",
+                alpha=0.85,
+            )
+            for bar, beta in zip(bars, composite_betas):
+                h = bar.get_height()
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    h + 0.01,
+                    f"{beta:.3f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=10,
+                )
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(factors, fontsize=12)
+        ax.axhline(y=0, color="black", linewidth=0.5)
+        ax.axhline(y=1, color="gray", linewidth=0.5, linestyle="--", alpha=0.5)
+        ax.set_ylabel("Factor Loading (Beta)", fontsize=12)
+        ax.set_title(
+            "Composite Portfolio Factor Loadings\n"
+            f"(Coverage: {composite_results.coverage:.1%}, "
+            f"Alpha: {composite_results.weighted_alpha * 100:.2f}%)",
+            fontsize=14,
+        )
+        ax.grid(True, alpha=0.3, axis="y")
         plt.tight_layout()
         plt.show()
