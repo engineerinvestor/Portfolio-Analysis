@@ -4,7 +4,7 @@ Factor-based return and risk attribution for portfolio analysis.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -49,7 +49,7 @@ class FactorAttribution:
         self,
         returns: pd.Series,
         factor_data: pd.DataFrame,
-        annualization_factor: Optional[int] = None,
+        annualization_factor: int | None = None,
     ):
         self.raw_returns = returns
         self.raw_factor_data = factor_data
@@ -75,7 +75,7 @@ class FactorAttribution:
         self._regression = FactorRegression(returns, factor_data, annualization_factor)
 
     def decompose_returns(
-        self, model: Union[str, FactorModel] = "ff3"
+        self, model: str | FactorModel = "ff3"
     ) -> dict[str, float]:
         """
         Decompose total returns into factor contributions.
@@ -128,7 +128,7 @@ class FactorAttribution:
         return contributions
 
     def decompose_risk(
-        self, model: Union[str, FactorModel] = "ff3"
+        self, model: str | FactorModel = "ff3"
     ) -> dict[str, float]:
         """
         Decompose portfolio variance into factor contributions.
@@ -176,7 +176,7 @@ class FactorAttribution:
         return contributions
 
     def get_rolling_attribution(
-        self, model: Union[str, FactorModel] = "ff3", window: int = 60
+        self, model: str | FactorModel = "ff3", window: int = 60
     ) -> pd.DataFrame:
         """
         Calculate rolling return attribution over time.
@@ -235,7 +235,7 @@ class FactorAttribution:
         return df
 
     def get_attribution_summary(
-        self, model: Union[str, FactorModel] = "ff3"
+        self, model: str | FactorModel = "ff3"
     ) -> pd.DataFrame:
         """
         Get a summary table of return and risk attribution.
@@ -380,7 +380,7 @@ class FactorAttribution:
 
         return contributions
 
-    def summary(self, model: Union[str, FactorModel] = "ff3") -> str:
+    def summary(self, model: str | FactorModel = "ff3") -> str:
         """Generate a text summary of factor attribution."""
         return_decomp = self.decompose_returns(model)
         risk_decomp = self.decompose_risk(model)

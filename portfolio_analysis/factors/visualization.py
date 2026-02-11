@@ -4,7 +4,7 @@ Factor analysis visualization functionality.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -100,7 +100,7 @@ class FactorVisualization:
     def plot_rolling_betas(
         rolling_data: pd.DataFrame,
         figsize: tuple = (12, 8),
-        factors: Optional[list[str]] = None,
+        factors: list[str] | None = None,
     ) -> None:
         """
         Plot rolling factor betas over time.
@@ -598,7 +598,7 @@ class FactorVisualization:
     @staticmethod
     def plot_composite_exposures(
         composite_results: CompositeRegressionResults,
-        baseline_results: Optional[RegressionResults] = None,
+        baseline_results: RegressionResults | None = None,
         figsize: tuple = (12, 6),
     ) -> None:
         """
